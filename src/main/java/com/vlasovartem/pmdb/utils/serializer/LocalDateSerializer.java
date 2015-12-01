@@ -11,9 +11,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 /**
- * Created by artemvlasov on 01/12/15.
+ * LocalDateSerializer
  */
-
 public class LocalDateSerializer extends JsonSerializer<LocalDate> {
     @Override
     public void serialize(LocalDate localDate, JsonGenerator jgen, SerializerProvider serializerProvider) throws

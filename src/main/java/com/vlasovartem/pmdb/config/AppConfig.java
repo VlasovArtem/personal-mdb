@@ -1,8 +1,6 @@
 package com.vlasovartem.pmdb.config;
 
-import com.mongodb.Mongo;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
+import com.mongodb.*;
 import com.vlasovartem.pmdb.utils.parser.EpisodeParser;
 import com.vlasovartem.pmdb.utils.parser.SeasonParser;
 import com.vlasovartem.pmdb.utils.parser.SeriesParser;
@@ -12,6 +10,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Created by artemvlasov on 30/11/15.
@@ -29,7 +30,9 @@ public class AppConfig extends AbstractMongoConfiguration {
 
     @Override
     public Mongo mongo() throws Exception {
-        return new MongoClient(new MongoClientURI("mongodb://heroku_r183c426:qjempqqji3ukn89v4f6icj8k3a@ds059644.mongolab.com:59644"));
+        return new MongoClient(
+                        new ServerAddress("mongodb://ds059644.mongolab.com", 59644),
+                Collections.singletonList(MongoCredential.createCredential("heroku_r183c426", "heroku_r183c426", "qjempqqji3ukn89v4f6icj8k3a".toCharArray())));
     }
 
     @Override
