@@ -30,9 +30,7 @@ public class AppConfig extends AbstractMongoConfiguration {
 
     @Override
     public Mongo mongo() throws Exception {
-        return new MongoClient(
-                        new ServerAddress("mongodb://ds059644.mongolab.com", 59644),
-                Collections.singletonList(MongoCredential.createCredential("heroku_r183c426", "heroku_r183c426", "qjempqqji3ukn89v4f6icj8k3a".toCharArray())));
+        return new MongoClient(new MongoClientURI("mongodb://heroku_r183c426:qjempqqji3ukn89v4f6icj8k3a@ds059644.mongolab.com:59644/heroku_r183c426"));
     }
 
     @Override
