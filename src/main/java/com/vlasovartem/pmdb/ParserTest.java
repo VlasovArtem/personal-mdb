@@ -4,6 +4,9 @@ import com.vlasovartem.pmdb.config.AppConfig;
 import com.vlasovartem.pmdb.entity.Series;
 import com.vlasovartem.pmdb.repository.SeriesRepository;
 import com.vlasovartem.pmdb.utils.parser.SeriesParser;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
