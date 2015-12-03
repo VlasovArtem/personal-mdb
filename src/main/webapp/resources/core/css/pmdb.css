@@ -1,0 +1,139 @@
+html, body {
+    height: 100%;
+}
+section {
+    padding-bottom: 50px;
+}
+
+/* Nav bar */
+.pmdb-navbar {
+    border-radius: 0;
+    background-color: #041a66;
+    border: none;
+}
+.line {
+    width: 0;
+    height: 4px;
+    background-color: white;
+    opacity: 0;
+    display: block;
+    margin-top: 5px;
+    margin-left: 50%;
+    transition: width 1s, margin-left 1s, opacity 2s;
+}
+.pmdb-navbar a:hover .line {
+    width: 100%;
+    margin-left: 0;
+    opacity: 1;
+    transition: width 1s, margin-left 1s, opacity .5s;
+}
+.pmdb-navbar a {
+    color: white !important;
+}
+#header-info {
+    height: 400px;
+}
+#api-info fieldset legend {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    display: block;
+}
+#api-info fieldset legend span {
+    font-size: small;
+    color: gray;
+}
+#parsed-series {
+    /*height: 300px;*/
+}
+#footer {
+    height: 200px;
+    padding-bottom: 20px;
+}
+.true {
+    padding: 3px;
+    color: white;
+    background-color: green;
+}
+.optional {
+    padding: 3px;
+    background-color: darkcyan;
+    color: white;
+}
+.no {
+    background-color: coral;
+    color: white;
+    padding: 3px;
+}
+.json-example > .code {
+    height: 300px;
+    overflow: scroll;
+}
+.json-example > .code > pre {
+    background-color: #2b2b2b;
+}
+.result.success {
+    color: green;
+    padding: 0 10px;
+    font-size: large;
+    font-weight: bold;
+}
+.result.error {
+    color: red;
+    padding: 0 10px;
+    font-size: large;
+    font-weight: bold;
+}
+fieldset {
+    padding: 0 !important;
+}
+summary:focus {
+    outline: none;
+}
+td {
+    vertical-align: top;
+}
+#usage-example {
+    height: 433px;
+}
+.usage-example-block {
+    position: relative;
+}
+.usage-example-block > article {
+    width: 500px;
+    position: relative;
+    padding: 0 15px;
+    float: left;
+}
+.usage-example-block > aside {
+    position: relative;
+    float: left;
+}
+.info-block {
+    height: 320px;
+}
+.info-block > .title {
+    width: 100%;
+    text-align: center;
+    font-size: large;
+    font-weight: bold;
+}
+.info-block > .year {
+    font-size: small;
+    color: gray;
+    text-align: center;
+}
+.info-block > .rating {
+    padding: 10px 0;
+}
+.info-block > .rating img {
+    vertical-align: top;
+}
+.info-block .imdb-rating {
+    font-weight: bold;
+    font-size: 22px;
+}
+.info-block > .next-episode {
+    position: absolute;
+    bottom: 0;
+}

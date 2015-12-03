@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by artemvlasov on 29/11/15.
@@ -34,36 +33,31 @@ public class SeriesServiceImpl implements SeriesService {
     public List<Series> findByYear(int year, Sort sort, boolean hideFinished) {
         LocalDate yearStart = LocalDate.of(year, Month.JANUARY, 1);
         LocalDate yearEnd = LocalDate.of(year, Month.DECEMBER, 31);
-        if (Objects.nonNull(sort)) {
-            if (!hideFinished) {
-                return seriesRepository.findBySeriesStartBetween(yearStart, yearEnd, sort);
-            } else {
-                seriesRepository.findBySeriesStartBetweenAndFinishedFalse(yearStart, yearEnd, sort);
-            }
+        if (!hideFinished) {
+            return seriesRepository.findBySeriesStartBetween(yearStart, yearEnd, sort);
         } else {
-            if(!hideFinished) {
-                return seriesRepository.findBySeriesStartBetween(yearStart, yearEnd);
-            } else {
-                return seriesRepository.findBySeriesStartBetweenAndFinishedFalse(yearStart, yearEnd);
-            }
+            seriesRepository.findBySeriesStartBetweenAndFinishedIsFalse(yearStart, yearEnd, sort);
         }
         return null;
     }
 
     @Override
     public List<Series> findByGenre(String genre, Sort sort, boolean hideFinished) {
-        if(Objects.nonNull(sort)) {
-            if(!hideFinished) {
-                return seriesRepository.findByGenres(genre, sort);
-            } else {
-                return seriesRepository.findByGenresAndFinishedFalse(genre, sort);
-            }
+        if(!hideFinished) {
+            return seriesRepository.findByGenresIgnoreCase(genre, sort);
         } else {
-            if(!hideFinished) {
-                return seriesRepository.findByGenres(genre);
-            } else {
-                return seriesRepository.findByGenresAndFinishedFalse(genre);
-            }
+            return seriesRepository.findByGenresIgnoreCaseAndFinishedIsFalse(genre, sort);
+        }
+    }
+
+    @Override
+    public List<Series> findByGenreAndYear(Integer year, String genre, Sort sort, Boolean hideFinished) {
+        LocalDate yearStart = LocalDate.of(year, Month.JANUARY, 1);
+        LocalDate yearEnd = LocalDate.of(year, Month.DECEMBER, 31);
+        if(!hideFinished) {
+            return seriesRepository.findByGenresIgnoreCaseAndSeriesStartBetween(genre, yearStart, yearEnd, sort);
+        } else {
+            return seriesRepository.findByGenresIgnoreCaseAndSeriesStartBetweenAndFinishedIsFalse(genre, yearStart, yearEnd, sort);
         }
     }
 }

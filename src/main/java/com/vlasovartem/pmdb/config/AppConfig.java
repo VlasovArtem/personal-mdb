@@ -18,9 +18,8 @@ import java.util.Collections;
  * Created by artemvlasov on 30/11/15.
  */
 @Configuration
-@EnableMongoRepositories(basePackages = "com.vlasovartem.pmdb.repository")
+@EnableMongoRepositories(basePackages = {"com.vlasovartem.pmdb.repository"})
 @EnableMongoAuditing
-@ComponentScan("com.vlasovartem.pmdb.utils.parser")
 public class AppConfig extends AbstractMongoConfiguration {
 
     @Override
