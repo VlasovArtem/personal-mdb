@@ -211,7 +211,7 @@
                 </div>
                 <c:if test="${exampleSeries.nextEpisode != null}">
                     <div class="next-episode">
-                        <b>Next episode:</b> ${exampleSeries.nextEpisode}
+                        <b>Next episode:</b> ${exampleSeries.nextEpisode.episodeDate}
                     </div>
                 </c:if>
             </article>
@@ -222,6 +222,10 @@
     <article>
         <h2>Change Log</h2>
         <ul>
+            <li><%= LocalDate.of(2015, Month.DECEMBER, 3)%></li>
+            <ul>
+                <li>Change structure of the json object. Update parser, for the best performance (i hope so)</li>
+            </ul>
             <li><%= LocalDate.of(2015, Month.DECEMBER, 2)%></li>
             <ul>
                 <li>Create main html page, that contains information about api</li>
