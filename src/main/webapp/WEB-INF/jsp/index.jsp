@@ -154,26 +154,26 @@
             <table>
                 <tr>
                     <td>
-                        <c:forEach items="${series}" var="ser" begin="${fnfmt:largest(fn:length(series)/4 * 0)}"
-                                   end="${fnfmt:largest(fn:length(series)/4 * 1 - 1)}">
+                        <c:forEach items="${series}" var="ser" begin="0"
+                                   end="${fnfmt:closest(fn:length(series)/4) - 1}">
                             <span class="col-md-12">${ser}</span>
                         </c:forEach>
                     </td>
                     <td>
-                        <c:forEach items="${series}" var="ser" begin="${fnfmt:largest(fn:length(series)/4 * 1)}"
-                                   end="${fnfmt:largest(fn:length(series)/4 * 2 - 1)}">
+                        <c:forEach items="${series}" var="ser" begin="${fnfmt:closest(fn:length(series)/4)}"
+                                   end="${fnfmt:closest(fn:length(series)/4) * 2 - 1}">
                             <span class="col-md-12">${ser}</span>
                         </c:forEach>
                     </td>
                     <td>
-                        <c:forEach items="${series}" var="ser" begin="${fnfmt:largest(fn:length(series)/4 * 2)}"
-                                   end="${fnfmt:largest(fn:length(series)/4 * 3 - 1)}">
+                        <c:forEach items="${series}" var="ser" begin="${fnfmt:closest(fn:length(series)/4) * 2}"
+                                   end="${fnfmt:closest(fn:length(series)/4) * 3 - 1}">
                             <span class="col-md-12">${ser}</span>
                         </c:forEach>
                     </td>
                     <td>
-                        <c:forEach items="${series}" var="ser" begin="${fnfmt:largest(fn:length(series)/4 * 3)}"
-                                   end="${fnfmt:largest(fn:length(series)/4 * 4 - 1)}">
+                        <c:forEach items="${series}" var="ser" begin="${fnfmt:closest(fn:length(series)/4) * 3}"
+                                   end="${fn:length(series)}">
                             <span class="col-md-12">${ser}</span>
                         </c:forEach>
                     </td>
