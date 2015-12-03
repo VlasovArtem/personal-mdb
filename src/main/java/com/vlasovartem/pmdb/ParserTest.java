@@ -1,9 +1,8 @@
 package com.vlasovartem.pmdb;
 
 import com.vlasovartem.pmdb.config.AppConfig;
-import com.vlasovartem.pmdb.entity.Series;
+import com.vlasovartem.pmdb.parser.SeriesParser;
 import com.vlasovartem.pmdb.repository.SeriesRepository;
-import com.vlasovartem.pmdb.utils.parser.SeriesParser;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -17,7 +16,6 @@ public class ParserTest {
         ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
         SeriesRepository seriesRepository = (SeriesRepository) context.getBean("seriesRepository");
         SeriesParser parser = (SeriesParser) context.getBean("seriesParser");
-        Series series = parser.parse("Grimm");
-        seriesRepository.save(series);
+        System.out.println(parser);
     }
 }

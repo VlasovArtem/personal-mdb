@@ -149,32 +149,31 @@
                 </div>
             </form>
         </fieldset>
-
         <details class="col-md-12">
             <summary>Available series:</summary>
             <table>
                 <tr>
                     <td>
                         <c:forEach items="${series}" var="ser" begin="${fnfmt:largest(fn:length(series)/4 * 0)}"
-                                   end="${fnfmt:largest(fn:length(series)/4 * 1)}">
+                                   end="${fnfmt:largest(fn:length(series)/4 * 1 - 1)}">
                             <span class="col-md-12">${ser}</span>
                         </c:forEach>
                     </td>
                     <td>
-                        <c:forEach items="${series}" var="ser" begin="${fnfmt:largest(fn:length(series)/4 * 1 + 1)}"
-                                   end="${fnfmt:largest(fn:length(series)/4 * 2)}">
+                        <c:forEach items="${series}" var="ser" begin="${fnfmt:largest(fn:length(series)/4 * 1)}"
+                                   end="${fnfmt:largest(fn:length(series)/4 * 2 - 1)}">
                             <span class="col-md-12">${ser}</span>
                         </c:forEach>
                     </td>
                     <td>
-                        <c:forEach items="${series}" var="ser" begin="${fnfmt:largest(fn:length(series)/4 * 2 + 1)}"
-                                   end="${fnfmt:largest(fn:length(series)/4 * 3)}">
+                        <c:forEach items="${series}" var="ser" begin="${fnfmt:largest(fn:length(series)/4 * 2)}"
+                                   end="${fnfmt:largest(fn:length(series)/4 * 3 - 1)}">
                             <span class="col-md-12">${ser}</span>
                         </c:forEach>
                     </td>
                     <td>
-                        <c:forEach items="${series}" var="ser" begin="${fnfmt:largest(fn:length(series)/4 * 3 + 1)}"
-                                   end="${fnfmt:largest(fn:length(series)/4 * 4)}">
+                        <c:forEach items="${series}" var="ser" begin="${fnfmt:largest(fn:length(series)/4 * 3)}"
+                                   end="${fnfmt:largest(fn:length(series)/4 * 4 - 1)}">
                             <span class="col-md-12">${ser}</span>
                         </c:forEach>
                     </td>

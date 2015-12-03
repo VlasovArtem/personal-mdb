@@ -69,4 +69,33 @@ public class Episode {
     public void setUrl(String url) {
         this.url = url;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Episode episode = (Episode) o;
+
+        if (episodeNumber != episode.episodeNumber) return false;
+        if (seasonNumber != episode.seasonNumber) return false;
+        if (episodeDate != null ? !episodeDate.equals(episode.episodeDate) : episode.episodeDate != null) return false;
+        if (summary != null ? !summary.equals(episode.summary) : episode.summary != null) return false;
+        if (title != null ? !title.equals(episode.title) : episode.title != null) return false;
+        if (imdbRating != null ? !imdbRating.equals(episode.imdbRating) : episode.imdbRating != null) return false;
+        return !(url != null ? !url.equals(episode.url) : episode.url != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = episodeNumber;
+        result = 31 * result + seasonNumber;
+        result = 31 * result + (episodeDate != null ? episodeDate.hashCode() : 0);
+        result = 31 * result + (summary != null ? summary.hashCode() : 0);
+        result = 31 * result + (title != null ? title.hashCode() : 0);
+        result = 31 * result + (imdbRating != null ? imdbRating.hashCode() : 0);
+        result = 31 * result + (url != null ? url.hashCode() : 0);
+        return result;
+    }
 }

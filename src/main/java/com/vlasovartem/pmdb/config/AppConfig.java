@@ -1,18 +1,17 @@
 package com.vlasovartem.pmdb.config;
 
-import com.mongodb.*;
-import com.vlasovartem.pmdb.utils.parser.EpisodeParser;
-import com.vlasovartem.pmdb.utils.parser.SeasonParser;
-import com.vlasovartem.pmdb.utils.parser.SeriesParser;
+import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
+import com.vlasovartem.pmdb.parser.EpisodeParser;
+import com.vlasovartem.pmdb.parser.SeasonParser;
+import com.vlasovartem.pmdb.parser.SeriesParser;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-
-import java.util.Collection;
-import java.util.Collections;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Created by artemvlasov on 30/11/15.
@@ -20,6 +19,7 @@ import java.util.Collections;
 @Configuration
 @EnableMongoRepositories(basePackages = {"com.vlasovartem.pmdb.repository"})
 @EnableMongoAuditing
+@EnableScheduling
 public class AppConfig extends AbstractMongoConfiguration {
 
     @Override
