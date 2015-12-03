@@ -23,19 +23,19 @@ public class SeriesUpdateScheduler {
         this.seriesRepository = seriesRepository;
     }
 
-    @Scheduled(cron = "0 0 0 1/1 * ? *")
+    @Scheduled(cron = "0 0 0 * * *")
     public void updateNextEpisodeSchedule () {
         seriesRepository
                 .findByFinishedIsFalseAndNextEpisodeEpisodeDateGreaterThan(LocalDate.now())
                 .stream().peek(series -> seriesParser.updateNextEpisode(series));
     }
 
-    @Scheduled(cron = "0 0 0 ? * MON *")
+    @Scheduled(cron = "0 0 0 ? * MON")
     public void updateSchedule () {
         seriesParser.update(seriesRepository.findByFinishedIsFalse());
     }
 
-    @Scheduled(cron = "0 0 0 ? 1/1 MON#1 *")
+    @Scheduled(cron = "0 0 0 1 * ?")
     public void updateImdbRatingSchedule () {
         seriesRepository.findAll().stream().peek(series -> seriesParser.updateImdbRating(series));
     }
