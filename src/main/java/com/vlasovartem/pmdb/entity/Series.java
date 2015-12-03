@@ -28,7 +28,7 @@ public class Series {
     private List<String> actors;
     @JsonView(SeriesView.FullInfoView.class)
     private List<Season> seasons;
-    private LocalDate nextEpisode;
+    private Episode nextEpisode;
 
     public String getId() {
         return id;
@@ -134,11 +134,11 @@ public class Series {
         this.seasons = seasons;
     }
 
-    public LocalDate getNextEpisode() {
+    public Episode getNextEpisode() {
         return nextEpisode;
     }
 
-    public void setNextEpisode(LocalDate nextEpisode) {
+    public void setNextEpisode(Episode nextEpisode) {
         this.nextEpisode = nextEpisode;
     }
 }

@@ -1,4 +1,4 @@
-package com.vlasovartem.pmdb.utils.parser;
+package com.vlasovartem.pmdb.parser;
 
 import com.vlasovartem.pmdb.entity.Episode;
 import com.vlasovartem.pmdb.entity.Season;
@@ -16,14 +16,16 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.vlasovartem.pmdb.utils.HtmlElementUtils.findText;
+import static java.util.Objects.*;
 import static java.util.Objects.nonNull;
 
 /**
@@ -34,20 +36,17 @@ public class SeriesParser {
 
     private static final String IMDB_SERIES_SEARCH_URL = "http://www.imdb" +
             ".com/find?q=search_title&s=tt&ttype=tv&ref_=fn_tv";
+    private static final String IMDB_SERIES_SEASON_URL_PATTERN = "http://www.imdb" +
+            ".com/title/@ID/episodes?season=@NUMBER&ref_=tt_eps_sn_@NUMBER";
     private static final String TITLE_SEARCH_CAP = "search_title";
     private static final Log LOG = LogFactory.getLog(SeriesParser.class);
     private static final String IMDB_SERIES_URL_PATTERN = "http://www\\.imdb\\.com/title/tt\\d+/\\?ref_=fn_tv_tt_1";
     private static final String IMDB_INITIAL_URL = "http://www.imdb.com";
     private SeasonParser seasonParser;
-    @Autowired
-    private SeriesRepository seriesRepository;
 
     @Autowired
     public SeriesParser(SeasonParser seasonParser) {
         this.seasonParser = seasonParser;
-    }
-
-    public SeriesParser() {
     }
 
     /**
@@ -56,6 +55,7 @@ public class SeriesParser {
      * @return Parsed series
      */
     public Series parse (String title) {
+        LOG.info(String.format("%s is parsing", title));
         String seriesUrl = findSearchUrl (title);
         if(nonNull(seriesUrl) && seriesUrl.matches(IMDB_SERIES_URL_PATTERN)) {
             return parseSeriesUrlContent(seriesUrl);
@@ -90,14 +90,18 @@ public class SeriesParser {
     }
 
     /**
-     * Update imdb rating
+     * Update imdb rating from series html page.
      * @param series updated series
      */
-    public void updateImdbRating(Series series) {
+    public void updateImdbRating (Series series) {
         try {
-            Document document = Jsoup.connect(series.getImdbUrl()).get();
-            Element element = document.getElementById("title-overview-widget-layout");
-            series.setImdbRating(parseImbdRating(element));
+            Document document = Jsoup.connect(series.getImdbUrl()).timeout(200000).get();
+            Element element = document.select("#title-overview-widget-layout").first();
+            if(nonNull(element)) {
+                series.setImdbRating(parseImbdRating(element));
+            }
+        } catch (SocketTimeoutException e) {
+            updateImdbRating(series);
         } catch (IOException e) {
             LOG.warn(String.format("Series %s is invalid", series.getImdbUrl()));
             e.printStackTrace();
@@ -105,17 +109,37 @@ public class SeriesParser {
     }
 
     /**
-     * Update series data
+     * Update series next episode
      * @param series updated series
      */
-    public void update(Series series) {
-        if (Objects.nonNull(series)) {
-            seasonParser.update(series.getSeasons());
+    public void updateNextEpisode (Series series) {
+        series.setNextEpisode(parseNextEpisode(series));
+    }
+
+    /**
+     * Check series is finished, if it`s not finished update next episode
+     * @param series updated series
+     */
+    public void update (Series series) {
+        if (nonNull(series)) {
+            series.setFinished(checkSeriesIsFinished(series));
             if(!series.isFinished()) {
+                if(!checkEndOfTheSeries(series)) {
+                    series.setNextEpisode(parseNextEpisode(series));
+                    if(series.getSeasons().size() < findAmountOfSeasons(series.getImdbUrl())) {
+                        Season season = seasonParser
+                                .parse(IMDB_SERIES_SEASON_URL_PATTERN
+                                        .replace("@ID", series.getId())
+                                        .replace("@NUMBER", String.valueOf(series.getSeasons().size() + 1)));
+                        if(Objects.nonNull(season)) {
+                            series.getSeasons().add(season);
+                        }
+                    }
+                    seasonParser.update(filterSeasonForUpdate(series.getSeasons()));
+                }
+            } else if (series.isFinished() && Objects.isNull(series.getSeriesEnd())) {
                 series.setSeriesEnd(parseSeriesEndDate(series.getSeasons()));
-                series.setFinished(parseSeriesIsFinished(series));
             }
-            series.setNextEpisode(parseNextEpisodeDate(series));
         }
     }
 
@@ -144,17 +168,16 @@ public class SeriesParser {
     private String findSearchUrl (String title) {
         String preparedUrl = prepareSearchUrl(title);
         try {
-            Document document = Jsoup.connect(preparedUrl).get();
-            Elements elements = document.getElementsByClass("findList");
-            if(elements.size() != 0) {
-                return IMDB_INITIAL_URL + elements.get(0)
-                        .getElementsByClass("odd").stream().findFirst().orElseThrow(() -> new RuntimeException("Find list is not contais odd elements"))
-                        .getElementsByClass("result_text").stream().findFirst().orElseThrow(() -> new RuntimeException("Find Result is not contains result text"))
-                        .getElementsByTag("a").stream().findFirst().orElseThrow(() -> new RuntimeException("Result text us not contains a tag"))
-                        .attr("href");
+            Document document = Jsoup.connect(preparedUrl).timeout(200000).get();
+            Element element = document.select("#main .findSection .result_text > a").first();
+            if(nonNull(element)) {
+                return IMDB_INITIAL_URL + element.attr("href");
             } else {
                 LOG.info(String.format("Url %s is not contains findList", preparedUrl));
+                return null;
             }
+        } catch (SocketTimeoutException e) {
+            findSearchUrl(title);
         } catch (IOException e) {
             LOG.error(String.format("Connection to url %s cause some problems", preparedUrl));
             e.printStackTrace();
@@ -170,7 +193,7 @@ public class SeriesParser {
     private Series parseSeriesUrlContent (String seriesUrl) {
         try {
             Document document = Jsoup.connect(seriesUrl).get();
-            Element titleLayout = document.getElementById("title-overview-widget-layout");
+            Element titleLayout = document.select("#title-overview-widget-layout").first();
             Series series = new Series();
             if(nonNull(titleLayout)) {
                 series.setId(parseSeriesId(seriesUrl));
@@ -185,13 +208,14 @@ public class SeriesParser {
                 series.setSeasons(checkProperty(parseSeasons(document.getElementById("title-episode-widget")), seriesUrl, "seasons"));
                 series.setSeriesStart(checkProperty(parseSeriesStartDate(series.getSeasons()), seriesUrl, "start date"));
                 series.setSeriesEnd(checkProperty(parseSeriesEndDate(series.getSeasons()), seriesUrl, "end date"));
-//                series.setFinished(parseSeriesIsFinished(series));
-                series.setNextEpisode(checkProperty(parseNextEpisodeDate(series), seriesUrl, "next episode date"));
+                series.setNextEpisode(checkProperty(parseNextEpisode(series), seriesUrl, "next episode"));
                 return series;
             } else {
                 LOG.warn(createErrorMessage(seriesUrl, "layout element"));
                 return null;
             }
+        } catch (SocketTimeoutException e) {
+            parseSeriesUrlContent(seriesUrl);
         } catch (IOException e) {
             LOG.error(String.format("Series url %s is invalid", seriesUrl));
             e.printStackTrace();
@@ -205,11 +229,11 @@ public class SeriesParser {
      * @return url of the image, or return null
      */
     private String parseSeriesImageUrl (Element titleLayout) {
-        try {
-            return titleLayout.getElementById("img_primary").getElementsByTag("img").first().attr("src");
-        } catch (NullPointerException e) {
-            return null;
+        Element imgElement = titleLayout.select("#img_primary > .image > a > img").first();
+        if(nonNull(imgElement)) {
+            return imgElement.attr("src");
         }
+        return null;
     }
 
     /**
@@ -220,18 +244,16 @@ public class SeriesParser {
      */
     private Boolean parseSeriesHeader (Element titleLayout, Series series) {
         String seriesFinishedPattern = "\\(\\d{4}-\\d{4}\\)";
-        try {
-            Elements headerElements = titleLayout.getElementById("overview-top").getElementsByClass("header").first()
-                    .getElementsByTag("span");
-            boolean hasExtraTitle = headerElements.stream().anyMatch(element1 -> "title-extra".equals(element1.attr
-                    ("class")));
+        Elements headerElements = titleLayout.select("#overview-top > h1 > span");
+        if(nonNull(headerElements)) {
+            boolean hasExtraTitle = headerElements.stream().anyMatch(element1 -> element1.hasClass("title-extra"));
             for (Element element : headerElements) {
                 if (element.hasClass("itemprop") && !hasExtraTitle) {
                     series.setTitle(element.text());
                 } else if (element.hasClass("title-extra")) {
                     String parsedText = element.text();
-                    for(String title : parsedText.split("\"")) {
-                        if(title.matches("(\\w+\\s?)+")) {
+                    for (String title : parsedText.split("\"")) {
+                        if (title.matches("(\\w+\\s?)+")) {
                             series.setTitle(title);
                         }
                     }
@@ -243,10 +265,8 @@ public class SeriesParser {
                 }
             }
             return true;
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-            return null;
         }
+        return null;
     }
 
     /**
@@ -255,17 +275,11 @@ public class SeriesParser {
      * @return List of the Genres
      */
     private List<String> parseGenres (Element titleLayout) {
-        try {
-            return titleLayout.getElementsByClass("infobar")
-                    .first()
-                    .getElementsByTag("span")
-                    .stream()
-                    .filter(e -> "genre".equals(e.attr("itemprop")))
-                    .map(Element::text)
-                    .collect(Collectors.toList());
-        } catch (NullPointerException e) {
-            return null;
+        Elements genresElements = titleLayout.select("#overview-top > div.infobar > a > span[itemprop=genre]");
+        if(nonNull(genresElements)) {
+            return genresElements.stream().map(Element::text).collect(Collectors.toList());
         }
+        return null;
     }
 
     /**
@@ -274,11 +288,11 @@ public class SeriesParser {
      * @return parse rating or null of element was not found
      */
     private Double parseImbdRating (Element titleLayout) {
-        try {
-            return Double.valueOf(titleLayout.getElementsByClass("star-box-giga-star").first().text());
-        } catch (NullPointerException e) {
-            return null;
+        String rating = findText(".star-box-giga-star", titleLayout);
+        if (nonNull(rating) && rating.matches("\\d\\.\\d")) {
+            return Double.valueOf(rating);
         }
+        return null;
     }
 
     /**
@@ -287,11 +301,7 @@ public class SeriesParser {
      * @return Parsed description
      */
     private String parseDescription (Element titleLayout) {
-        try {
-            return titleLayout.getElementById("overview-top").getElementsByAttributeValue("itemprop", "description").text();
-        } catch (NullPointerException e) {
-            return null;
-        }
+        return findText("#overview-top > p[itemprop=description]", titleLayout);
     }
 
     /**
@@ -319,16 +329,13 @@ public class SeriesParser {
      * @return List of parsed objects
      */
     private List<String> parsePersons (Element titleLayout, String castType) {
-        try {
-            return titleLayout.getElementById("overview-top")
-                    .getElementsByAttributeValue("itemprop", castType).first()
-                    .getElementsByAttributeValue("itemprop", "name")
-                    .stream()
-                    .map(Element::text)
-                    .collect(Collectors.toList());
-        } catch (NullPointerException e) {
-            return null;
+        Elements castElements = titleLayout.select(
+                String.format("#overview-top > div[itemprop=%s] > a[itemprop=url] > span[itemprop=name]",
+                        castType));
+        if(nonNull(castElements)) {
+            return castElements.stream().map(Element::text).collect(Collectors.toList());
         }
+        return null;
     }
 
     /**
@@ -352,28 +359,29 @@ public class SeriesParser {
      */
     private List<Season> parseSeasons (Element titleLayout) {
         String seasonUrlPatten = "/title/tt\\d{7}/episodes\\?season=\\d.+";
-        String seasonUrlExample = "/title/@ID/episodes?season=@NUMBER&ref_=tt_eps_sn_@NUMBER";
-        try {
-            List<Element> elements = titleLayout
-                    .getElementById("title-episode-widget")
-                    .getElementsByClass("seasons-and-year-nav").first()
-                    .getElementsByTag("a").stream().filter(e -> e.attr("href").matches(seasonUrlPatten)).collect(Collectors.toList());
-            int lastSeasonNumber = Integer.valueOf(elements.stream()
-                    .map(Element::text)
-                    .max(Comparator.comparingInt(Integer::valueOf)).get());
-            String seriesId = parseSeriesId(elements.stream().findFirst().get().attr("href"));
-            List<String> listSeasonUrls = new ArrayList<>(lastSeasonNumber);
-            if(Objects.nonNull(seriesId)) {
-                for (int i = 0; i < lastSeasonNumber; i++) {
-                    listSeasonUrls.add(IMDB_INITIAL_URL + seasonUrlExample
-                            .replace("@ID", seriesId)
-                            .replace("@NUMBER", String.valueOf(i + 1)));
+        Elements seasonUrls = titleLayout.select("#title-episode-widget > .seasons-and-year-nav a");
+        if(nonNull(seasonUrls)) {
+            List<Element> seasons = seasonUrls.stream()
+                    .filter(e -> e.attr("href").matches(seasonUrlPatten))
+                    .collect(Collectors.toList());
+            if(nonNull(seasons) && seasons.size() > 0) {
+                int lastSeasonNumber = Integer.valueOf(seasons.stream()
+                        .map(Element::text)
+                        .max(Comparator.comparingInt(Integer::valueOf)).get());
+                String seriesId = parseSeriesId(seasons.get(0).attr("href"));
+                List<String> listSeasonUrls = new ArrayList<>(lastSeasonNumber);
+                if(nonNull(seriesId)) {
+                    for (int i = 0; i < lastSeasonNumber; i++) {
+                        listSeasonUrls.add(IMDB_SERIES_SEASON_URL_PATTERN
+                                .replace("@ID", seriesId)
+                                .replace("@NUMBER", String.valueOf(i + 1)));
+                    }
+                    return seasonParser.parse(listSeasonUrls);
                 }
             }
-            return seasonParser.parse(listSeasonUrls);
-        } catch (NullPointerException e) {
-            return null;
+
         }
+        return null;
     }
 
     /**
@@ -382,7 +390,7 @@ public class SeriesParser {
      * @return series start date
      */
     private LocalDate parseSeriesStartDate(List<Season> seasons) {
-        if (Objects.nonNull(seasons)) {
+        if (nonNull(seasons)) {
             if(seasons.get(0).getSeasonNumber() != 1) {
                 for (Season season : seasons) {
                     if(season.getSeasonNumber() == 1) {
@@ -402,7 +410,7 @@ public class SeriesParser {
      * @return series end date
      */
     private LocalDate parseSeriesEndDate(List<Season> seasons) {
-        if(Objects.nonNull(seasons)) {
+        if(nonNull(seasons)) {
             if(seasons.get(seasons.size() - 1).getSeasonNumber() != seasons.size()) {
                 return seasons.stream().max(Comparator.comparingInt(Season::getSeasonNumber)).orElse(null).getSeasonEnd();
             } else {
@@ -413,45 +421,39 @@ public class SeriesParser {
     }
 
     /**
-     * Parse that series is finished
-     * @param series updated series
-     * @return true if series is finished otherwise false
-     */
-    private boolean parseSeriesIsFinished (Series series) {
-        if(Objects.isNull(series.getSeriesEnd())) {
-            return false;
-        } else {
-            return LocalDate.now().isAfter(series.getSeriesEnd());
-        }
-    }
-
-    /**
      * Parse next episode date
      * @param series updated series
      * @return date of the next episode.
      */
-    public LocalDate parseNextEpisodeDate (Series series) {
-        if(!series.isFinished()) {
-            List<Season> seasons = series.getSeasons();
-            if (Objects.nonNull(seasons) && seasons.size() != 0) {
-                List<Episode> episodes = seasons.get(seasons.size() - 1).getEpisodes();
-                if (Objects.nonNull(episodes) && episodes.size() != 0) {
-                    LocalDate nextEpisodeDate = null;
-                    LocalDate today = LocalDate.now();
-                    for (Episode episode : episodes) {
-                        if(Objects.nonNull(episode.getEpisodeDate()) && episode.getEpisodeDate().isAfter(today)) {
-                            nextEpisodeDate = episode.getEpisodeDate();
-                            break;
-                        }
-                    }
-                    if (Objects.isNull(nextEpisodeDate)) {
-                        nextEpisodeDate = LocalDate.of(today.getYear() + 1, Month.JANUARY, 1);
-                    }
-                    return nextEpisodeDate;
+    private Episode parseNextEpisode(Series series) {
+        if(Objects.nonNull(series)) {
+            if(checkEndOfTheSeason(series)) {
+                Season nextSeason = series.getSeasons().stream()
+                        .filter(s -> s.getSeasonNumber() == series.getNextEpisode().getSeasonNumber() + 1).findFirst().get();
+                if(Objects.nonNull(nextSeason.getEpisodes()) && nextSeason.getEpisodes().size() != 0) {
+                    return nextSeason.getEpisodes().get(0);
+                }
+            } else {
+                List<Episode> episodes = series.getSeasons().stream()
+                        .filter(s -> s.getSeasonNumber() == series.getNextEpisode().getSeasonNumber())
+                        .findFirst().get().getEpisodes();
+                if(Objects.nonNull(episodes) && episodes.size() != 0) {
+                    return episodes.stream()
+                            .filter(e -> e.getEpisodeNumber() == series.getNextEpisode().getEpisodeNumber() + 1)
+                            .findFirst().get();
                 }
             }
         }
         return null;
+    }
+
+    /**
+     * Check episode date if episode not null or current date is before episode date and return true otherwise false
+     * @param episodeDate Episode date
+     * @return true if episode date is after current date otherwise false
+     */
+    private boolean checkEpisodeDate (LocalDate episodeDate) {
+        return nonNull(episodeDate) && LocalDate.now().isBefore(episodeDate);
     }
 
     /**
@@ -463,7 +465,7 @@ public class SeriesParser {
      * @return Series property
      */
     private <T> T checkProperty(T t, String seriesUrl, String errorObject) {
-        if(Objects.isNull(t)) {
+        if(isNull(t)) {
             LOG.warn(createErrorMessage(seriesUrl, errorObject));
         }
         return t;
@@ -477,5 +479,74 @@ public class SeriesParser {
      */
     private String createErrorMessage (String seriesUrl, String errorObject) {
         return String.format("Series with url %s, does not contains %s.", seriesUrl, errorObject);
+    }
+
+    private boolean checkSeriesIsFinished (Series series) {
+        if(nonNull(series)) {
+            if(nonNull(series.getSeriesEnd())
+                    && LocalDate.now().minusYears(1).isAfter(series.getSeriesEnd())) return true;
+            int currentSeason = series.getNextEpisode().getSeasonNumber();
+            int currentEpisode = series.getNextEpisode().getEpisodeNumber();
+            if(series.getSeasons().size() == currentSeason) {
+                Season season = series.getSeasons().stream()
+                        .filter(s -> s.getSeasonNumber() == currentSeason)
+                        .findFirst()
+                        .get();
+                if(season.getEpisodes().size() == currentEpisode) {
+                    if(findAmountOfSeasons(series.getImdbUrl()) == currentSeason) return true;
+                }
+            }
+
+        }
+        return false;
+    }
+
+    /**
+     * Parse number of season of the Series
+     * @param seriesUrl series imdb url
+     * @return number of seasons
+     */
+    private int findAmountOfSeasons(String seriesUrl) {
+        try {
+            Document document = Jsoup.connect(seriesUrl).timeout(400000).get();
+            Elements seasonUrls = document.select("#title-episode-widget > .seasons-and-year-nav a");
+            return seasonUrls.size();
+        } catch (IOException e) {
+            LOG.error(String.format("Series url %s is invalid", seriesUrl));
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    private boolean checkEndOfTheSeries(Series series) {
+        if(Objects.nonNull(series) && Objects.nonNull(series.getNextEpisode())) {
+            int currentSeason = series.getNextEpisode().getSeasonNumber();
+            if(series.getSeasons().size() == currentSeason) {
+                return checkEndOfTheSeason(series);
+            }
+        }
+        return false;
+    }
+    private boolean checkEndOfTheSeason (Series series) {
+        if(Objects.nonNull(series) && Objects.nonNull(series.getNextEpisode())) {
+            int currentSeason = series.getNextEpisode().getSeasonNumber();
+            int currentEpisode = series.getNextEpisode().getEpisodeNumber();
+            Season season;
+            if(series.getSeasons().get(series.getSeasons().size() - 1).getSeasonNumber() != currentSeason) {
+                season = series.getSeasons().stream()
+                        .filter(s -> s.getSeasonNumber() == currentSeason)
+                        .findFirst().get();
+            } else {
+                season = series.getSeasons().get(series.getSeasons().size() - 1);
+            }
+            return Objects.nonNull(season.getEpisodes()) && season.getEpisodes().size() == currentEpisode;
+        }
+        return false;
+    }
+
+    private List<Season> filterSeasonForUpdate (List<Season> seasons) {
+        return seasons.stream()
+                .filter(s -> Objects.isNull(s.getSeasonStart()) || Objects.isNull(s.getSeasonEnd()))
+                .collect(Collectors.toList());
     }
 }

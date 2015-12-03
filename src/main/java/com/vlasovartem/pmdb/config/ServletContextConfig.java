@@ -21,8 +21,8 @@ import java.util.List;
  */
 @Configuration
 @EnableWebMvc
-@ComponentScan({"com.vlasovartem.pmdb.controller", "com.vlasovartem.pmdb.utils.parser",
-        "com.vlasovartem.pmdb.utils.exception.handler"})
+@ComponentScan({"com.vlasovartem.pmdb.controller", "com.vlasovartem.pmdb.parser",
+        "com.vlasovartem.pmdb.utils.exception.handler", "com.vlasovartem.pmdb.batchjob"})
 public class ServletContextConfig extends WebMvcConfigurerAdapter {
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
