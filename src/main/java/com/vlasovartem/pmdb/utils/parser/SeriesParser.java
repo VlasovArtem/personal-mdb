@@ -185,7 +185,7 @@ public class SeriesParser {
                 series.setSeasons(checkProperty(parseSeasons(document.getElementById("title-episode-widget")), seriesUrl, "seasons"));
                 series.setSeriesStart(checkProperty(parseSeriesStartDate(series.getSeasons()), seriesUrl, "start date"));
                 series.setSeriesEnd(checkProperty(parseSeriesEndDate(series.getSeasons()), seriesUrl, "end date"));
-                series.setFinished(parseSeriesIsFinished(series));
+//                series.setFinished(parseSeriesIsFinished(series));
                 series.setNextEpisode(checkProperty(parseNextEpisodeDate(series), seriesUrl, "next episode date"));
                 return series;
             } else {

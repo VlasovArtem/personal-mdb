@@ -8,6 +8,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by artemvlasov on 29/11/15.
@@ -17,7 +22,7 @@ public class ParserTest {
         ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
         SeriesRepository seriesRepository = (SeriesRepository) context.getBean("seriesRepository");
         SeriesParser parser = (SeriesParser) context.getBean("seriesParser");
-        Series series = parser.parse("Criminal Minds");
+        Series series = parser.parse("Grimm");
         seriesRepository.save(series);
     }
 }

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+        version="2.0">
+
+    <description>JSTL 1.1 functions library</description>
+    <display-name>JSTL functions</display-name>
+    <tlib-version>1.1</tlib-version>
+    <short-name>fn</short-name>
+    <uri>pmdb-function</uri>
+    <function>
+        <description>
+            Return smallest number of the double 17.75 = 17
+        </description>
+        <name>largest</name>
+        <function-class>com.vlasovartem.pmdb.utils.jsp.functions.FormatFunctions</function-class>
+        <function-signature>long floor(double)</function-signature>
+    </function>
+    <function>
+        <description>
+            Join all string in List with ", " delimiter
+        </description>
+        <name>joining</name>
+        <function-class>com.vlasovartem.pmdb.utils.jsp.functions.FormatFunctions</function-class>
+        <function-signature>java.lang.String persons(java.util.List)</function-signature>
+    </function>
+</taglib>
