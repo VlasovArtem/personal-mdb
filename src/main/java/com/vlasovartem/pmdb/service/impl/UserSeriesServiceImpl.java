@@ -58,4 +58,9 @@ public class UserSeriesServiceImpl implements UserSeriesService {
         userSeries.setTitle(title);
         userSeriesRepository.save(userSeries);
     }
+
+    @Override
+    public void parse() {
+        userSeriesRepository.findAll().forEach(us -> parse(us.getId()));
+    }
 }
