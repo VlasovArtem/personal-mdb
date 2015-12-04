@@ -1,18 +1,20 @@
 function search () {
     var searchTitle = $('#searchForm input[type=search]')[0].value;
-    $.get("/search", "title=" + searchTitle)
-        .done(function() {
-            var result = $(".result");
-            result.removeClass("error");
-            result.addClass("success");
-            result.html("Found");
-        })
-        .fail(function() {
-            var result = $(".result");
-            result.addClass("error");
-            result.removeClass("success");
-            result.html("Not Found");
-        })
+    if(!_.isEqual(searchTitle, "")) {
+        $.get("/search", "title=" + searchTitle)
+            .done(function () {
+                var result = $(".result");
+                result.removeClass("error");
+                result.addClass("success");
+                result.html("Found");
+            })
+            .fail(function () {
+                var result = $(".result");
+                result.addClass("error");
+                result.removeClass("success");
+                result.html("Not Found");
+            })
+    }
 
 }
 $(function() {
@@ -67,4 +69,10 @@ function deleteUserService(id) {
         .done(function() {
             location.reload();
         });
+}
+function parseAllSeries () {
+    $.post("/user/series/parse/all")
+        .done(function() {
+            location.reload();
+        })
 }

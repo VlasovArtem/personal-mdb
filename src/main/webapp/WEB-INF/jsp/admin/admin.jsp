@@ -37,6 +37,11 @@
                 </tr>
             </c:forEach>
         </table>
+        <c:if test="${fn:length(userSeries) > 0}">
+            <div class="center">
+                <input type="button" class="btn btn-success" value="Parse all series" onclick="parseAllSeries()">
+            </div>
+        </c:if>
     </article>
 </section>
 </body>

@@ -1,13 +1,13 @@
 package com.vlasovartem.pmdb.controller;
 
-import com.vlasovartem.pmdb.entity.UserSeries;
-import com.vlasovartem.pmdb.parser.SeriesParser;
 import com.vlasovartem.pmdb.service.UserSeriesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -38,5 +38,10 @@ public class UserSeriesController {
     @RequestMapping(path = "/delete", method = RequestMethod.POST)
     public void delete (@RequestParam String id) {
         userSeriesService.deleteUserSeries(id);
+    }
+
+    @RequestMapping(path = "/parse/all", method = RequestMethod.POST)
+    public void parse () {
+        userSeriesService.parse();
     }
 }

@@ -3,15 +3,11 @@ package com.vlasovartem.pmdb.parser;
 import com.vlasovartem.pmdb.entity.Episode;
 import com.vlasovartem.pmdb.entity.Season;
 import com.vlasovartem.pmdb.entity.Series;
-import com.vlasovartem.pmdb.entity.UserSeries;
-import com.vlasovartem.pmdb.repository.SeriesRepository;
-import com.vlasovartem.pmdb.repository.UserSeriesRepository;
 import com.vlasovartem.pmdb.utils.exception.SeriesParsingException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.tomcat.jni.Local;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -22,10 +18,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -33,7 +26,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.vlasovartem.pmdb.utils.HtmlElementUtils.findText;
-import static java.util.Objects.*;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 /**
@@ -177,9 +170,16 @@ public class SeriesParser {
         String preparedUrl = prepareSearchUrl(title);
         try {
             Document document = Jsoup.connect(preparedUrl).timeout(200000).get();
-            Element element = document.select("#main .findSection .result_text > a").first();
+            Element element = document.select("#main .findSection .result_text").first();
+            boolean hasLocalizedTitle = element.text().toLowerCase().contains("aka");
+            String localizeTitle = null;
+            if(hasLocalizedTitle) {
+                 localizeTitle = element.text().toLowerCase();
+            }
+            element = element.select("a").first();
             if(nonNull(element)) {
-                if(StringUtils.equalsIgnoreCase(element.text(), title)) {
+                if(StringUtils.equalsIgnoreCase(element.text(), title) || (hasLocalizedTitle && localizeTitle
+                        .contains(title.toLowerCase()))) {
                     return IMDB_INITIAL_URL + element.attr("href");
                 } else {
                     LOG.warn(String.format("Title of the series %s does not match any series", title));

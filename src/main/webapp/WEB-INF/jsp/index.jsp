@@ -215,13 +215,17 @@
         <h2>Change Log</h2>
         <hr>
         <ul>
+            <li><%= LocalDate.of(2015, Month.DECEMBER, 4)%></li>
+            <ul>
+                <li>Update parser, add admin panel for parsing user series, add form for adding new series.</li>
+            </ul>
             <li><%= LocalDate.of(2015, Month.DECEMBER, 3)%></li>
             <ul>
-                <li>Change structure of the json object. Update parser, for the best performance (i hope so)</li>
+                <li>Change structure of the json object. Update parser, for the best performance (i hope so).</li>
             </ul>
             <li><%= LocalDate.of(2015, Month.DECEMBER, 2)%></li>
             <ul>
-                <li>Create main html page, that contains information about api</li>
+                <li>Create main html page, that contains information about api.</li>
             </ul>
         </ul>
     </article>

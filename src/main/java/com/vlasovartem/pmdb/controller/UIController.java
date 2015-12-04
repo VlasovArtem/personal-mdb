@@ -44,7 +44,7 @@ public class UIController {
     @RequestMapping("/search")
     @ResponseBody
     public ResponseEntity seriesSearch (@RequestParam String title) {
-        if(!uiService.seriesExists(title)) {
+        if(uiService.seriesExists(title)) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

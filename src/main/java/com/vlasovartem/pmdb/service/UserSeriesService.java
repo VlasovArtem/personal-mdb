@@ -5,9 +5,12 @@ package com.vlasovartem.pmdb.service;
  */
 public interface UserSeriesService {
     void addUserService (String title);
+
     void parse(String id);
 
     void deleteUserSeries(String id);
 
     void updateUserSeries(String id, String title);
+
+    void parse();
 }
