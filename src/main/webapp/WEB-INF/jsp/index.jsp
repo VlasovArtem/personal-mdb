@@ -12,32 +12,7 @@
 </head>
 <body>
 <header id="header-info">
-    <nav class="navbar navbar-default pmdb-navbar">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                        data-target="#pmdb-collapse"
-                        aria-expanded="false">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#header-info">Personal MDB<span class="line"></span></a>
-            </div>
-            <div class="collapse navbar-collapse" id="pmdb-collapse">
-                <ul class="nav navbar-nav">
-                    <li><a href="#api-info">API info<span class="line"></span></a></li>
-                    <li><a href="#parsed-series">Parsed series<span class="line"></span></a></li>
-                    <li><a href="#change-log">Change Log<span class="line"></span></a></li>
-                    <li><a href="#usage-example">Usage Example<span class="line"></span></a></li>
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
-                    <li><a href="https://github.com/VlasovArtem/personal-mdb">Github<span class="line"></span></a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <%@include file="navbar.jsp"%>
     <section class="container">
         <article>
             <section class="col-md-6">
@@ -137,15 +112,27 @@
 <section id="parsed-series" class="container">
     <article>
         <h2>Parsed Series</h2>
-        This list contains all series that successfully parsed into our database. This list will be update every day.
+        This list contains all series that successfully parsed into our database. This list will be update every day..
         Today we have ${fn:length(series)} parsed Series.<br>
-        <fieldset class="col-md-4">
+        If you cannot find your favorite Series, please use "Add Series" form, and then we will parse your series as
+        soon as possible.<br>
+        <fieldset class="col-md-5">
             <legend>Series search</legend>
             <form class="form-inline" id="searchForm">
                 <div class="form-group">
                     <input type="search" placeholder="Input series title" class="form-control">
                     <input type="button" class="btn btn-success" value="Search" onclick="search()">
                     <span class="result"></span>
+                </div>
+            </form>
+        </fieldset>
+        <fieldset class="col-md-offset-1 col-md-5">
+            <legend>Add Series</legend>
+            <form class="form-inline" id="addSeriesForm">
+                <div class="form-group">
+                    <input type="text" placeholder="Input new Series title" class="form-control" name="title">
+                    <input type="button" class="btn btn-success" value="Add" onclick="addSeries()">
+                    <span class="addResult"></span>
                 </div>
             </form>
         </fieldset>

@@ -5,6 +5,7 @@ import com.vlasovartem.pmdb.parser.SeriesParser;
 import com.vlasovartem.pmdb.repository.SeriesRepository;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import java.io.IOException;
 
@@ -18,14 +19,6 @@ public class ParserTest {
 //        SeriesParser parser = (SeriesParser) context.getBean("seriesParser");
 //        System.out.println(parser);
 
-        System.out.println(test(20));
-        System.out.println(test(18));
-        System.out.println(test(24));
-        System.out.println(test(17));
-        System.out.println(test(18));
-    }
-
-    public static long test (double v) {
-        return Math.round(v) + ((Math.round(v) % 5) == 0 ? 0 : (5 - (Math.round(v) % 5)));
+        System.out.println(BCrypt.hashpw("0637472072", BCrypt.gensalt()));
     }
 }

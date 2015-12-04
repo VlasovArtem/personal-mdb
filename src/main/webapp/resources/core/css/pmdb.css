@@ -21,6 +21,9 @@ section {
     margin-left: 50%;
     transition: width 1s, margin-left 1s, opacity 2s;
 }
+.center {
+    text-align: center;
+}
 .pmdb-navbar a:hover .line {
     width: 100%;
     margin-left: 0;

@@ -29,3 +29,23 @@ $(function() {
         }
     });
 });
+function addSeries() {
+    var addSeries = $('#addSeriesForm input[type=text]')[0].value;
+    $.post("/user/series/add", {title : addSeries})
+        .done(function() {
+            var result = $(".addResult");
+            $('#addSeriesForm input[type=text]')[0].value = "";
+            result.removeClass("error");
+            result.addClass("success");
+            result.html("Successfully added");
+        })
+        .fail(function() {
+            var result = $(".addResult");
+            result.addClass("error");
+            result.removeClass("success");
+            result.html("Oops this series is already exists");
+        })
+}
+function parseSeries(id) {
+    $.post("/user/series/parse", {userSeriesId : id});
+}

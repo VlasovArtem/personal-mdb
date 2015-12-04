@@ -3,7 +3,10 @@ package com.vlasovartem.pmdb.parser;
 import com.vlasovartem.pmdb.entity.Episode;
 import com.vlasovartem.pmdb.entity.Season;
 import com.vlasovartem.pmdb.entity.Series;
+import com.vlasovartem.pmdb.entity.UserSeries;
 import com.vlasovartem.pmdb.repository.SeriesRepository;
+import com.vlasovartem.pmdb.repository.UserSeriesRepository;
+import com.vlasovartem.pmdb.utils.exception.SeriesParsingException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -171,7 +174,12 @@ public class SeriesParser {
             Document document = Jsoup.connect(preparedUrl).timeout(200000).get();
             Element element = document.select("#main .findSection .result_text > a").first();
             if(nonNull(element)) {
-                return IMDB_INITIAL_URL + element.attr("href");
+                if(element.text().toLowerCase().equals(title)) {
+                    return IMDB_INITIAL_URL + element.attr("href");
+                } else {
+                    LOG.warn(String.format("Title of the series %s does not match any series", title));
+                    throw new SeriesParsingException(String.format("Title of the series %s does not match any series", title));
+                }
             } else {
                 LOG.info(String.format("Url %s is not contains findList", preparedUrl));
                 return null;
