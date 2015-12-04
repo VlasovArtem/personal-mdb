@@ -23,6 +23,14 @@
         </description>
         <name>joining</name>
         <function-class>com.vlasovartem.pmdb.utils.jsp.functions.FormatFunctions</function-class>
-        <function-signature>java.lang.String persons(java.util.List)</function-signature>
+        <function-signature>java.lang.String joining(java.util.List)</function-signature>
+    </function>
+    <function>
+        <description>
+            Return closes number that modulus on 5
+        </description>
+        <name>closest</name>
+        <function-class>com.vlasovartem.pmdb.utils.jsp.functions.FormatFunctions</function-class>
+        <function-signature>long closest(double)</function-signature>
     </function>
 </taglib>

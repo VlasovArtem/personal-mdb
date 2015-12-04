@@ -73,7 +73,7 @@ public class Episode {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Episode)) return false;
 
         Episode episode = (Episode) o;
 

@@ -12,36 +12,12 @@
 </head>
 <body>
 <header id="header-info">
-    <nav class="navbar navbar-default pmdb-navbar">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                        data-target="#pmdb-collapse"
-                        aria-expanded="false">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#header-info">Personal MDB<span class="line"></span></a>
-            </div>
-            <div class="collapse navbar-collapse" id="pmdb-collapse">
-                <ul class="nav navbar-nav">
-                    <li><a href="#api-info">API info<span class="line"></span></a></li>
-                    <li><a href="#parsed-series">Parsed series<span class="line"></span></a></li>
-                    <li><a href="#change-log">Change Log<span class="line"></span></a></li>
-                    <li><a href="#usage-example">Usage Example<span class="line"></span></a></li>
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
-                    <li><a href="https://github.com/VlasovArtem/personal-mdb">Github<span class="line"></span></a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <%@include file="navbar.jsp"%>
     <section class="container">
         <article>
             <section class="col-md-6">
                 <h2>Personal MDB (Movie Database)</h2>
+                <hr>
                 This project was developed for my personal project that dedicated to Series Tracking. I haven`t found good
                 parsers and api that can provide useful and fresh information about favorite Series from website
                 www.imdb.com.
@@ -51,6 +27,7 @@
             </section>
             <section class="json-example col-md-6">
                 <h2>Json Example</h2>
+                <hr>
                 Data which presents in code block will be received after request <i>/series?title=The Expanse</i>.
                 This request will return full information about series with title "The Expanse".
                 <article class="code">
@@ -67,6 +44,7 @@
 <section class="container" id="api-info">
     <article>
         <h2>API Info</h2>
+        <hr>
         <table class="table table-striped">
             <tr>
                 <th>Parameter</th>
@@ -137,9 +115,12 @@
 <section id="parsed-series" class="container">
     <article>
         <h2>Parsed Series</h2>
-        This list contains all series that successfully parsed into our database. This list will be update every day.
+        <hr>
+        This list contains all series that successfully parsed into our database. This list will be update every day..
         Today we have ${fn:length(series)} parsed Series.<br>
-        <fieldset class="col-md-4">
+        If you cannot find your favorite Series, please use "Add Series" form, and then we will parse your series as
+        soon as possible.<br>
+        <fieldset class="col-md-5">
             <legend>Series search</legend>
             <form class="form-inline" id="searchForm">
                 <div class="form-group">
@@ -149,31 +130,41 @@
                 </div>
             </form>
         </fieldset>
+        <fieldset class="col-md-offset-2 col-md-5">
+            <legend>Add Series</legend>
+            <form class="form-inline" id="addSeriesForm">
+                <div class="form-group">
+                    <input type="text" placeholder="Input new Series title" class="form-control" name="title">
+                    <input type="button" class="btn btn-success" value="Add" onclick="addSeries()">
+                    <span class="addResult"></span>
+                </div>
+            </form>
+        </fieldset>
         <details class="col-md-12">
             <summary>Available series:</summary>
             <table>
                 <tr>
                     <td>
-                        <c:forEach items="${series}" var="ser" begin="${fnfmt:largest(fn:length(series)/4 * 0)}"
-                                   end="${fnfmt:largest(fn:length(series)/4 * 1 - 1)}">
+                        <c:forEach items="${series}" var="ser" begin="0"
+                                   end="${fnfmt:closest(fn:length(series)/4) - 1}">
                             <span class="col-md-12">${ser}</span>
                         </c:forEach>
                     </td>
                     <td>
-                        <c:forEach items="${series}" var="ser" begin="${fnfmt:largest(fn:length(series)/4 * 1)}"
-                                   end="${fnfmt:largest(fn:length(series)/4 * 2 - 1)}">
+                        <c:forEach items="${series}" var="ser" begin="${fnfmt:closest(fn:length(series)/4)}"
+                                   end="${fnfmt:closest(fn:length(series)/4) * 2 - 1}">
                             <span class="col-md-12">${ser}</span>
                         </c:forEach>
                     </td>
                     <td>
-                        <c:forEach items="${series}" var="ser" begin="${fnfmt:largest(fn:length(series)/4 * 2)}"
-                                   end="${fnfmt:largest(fn:length(series)/4 * 3 - 1)}">
+                        <c:forEach items="${series}" var="ser" begin="${fnfmt:closest(fn:length(series)/4) * 2}"
+                                   end="${fnfmt:closest(fn:length(series)/4) * 3 - 1}">
                             <span class="col-md-12">${ser}</span>
                         </c:forEach>
                     </td>
                     <td>
-                        <c:forEach items="${series}" var="ser" begin="${fnfmt:largest(fn:length(series)/4 * 3)}"
-                                   end="${fnfmt:largest(fn:length(series)/4 * 4 - 1)}">
+                        <c:forEach items="${series}" var="ser" begin="${fnfmt:closest(fn:length(series)/4) * 3}"
+                                   end="${fn:length(series)}">
                             <span class="col-md-12">${ser}</span>
                         </c:forEach>
                     </td>
@@ -185,6 +176,7 @@
 <section id="usage-example" class="container">
     <article>
         <h2>Usage Example</h2>
+        <hr>
         <div class="usage-example-block">
             <aside>
                 <img src="${exampleSeries.posterUrl}" height="320">
@@ -205,9 +197,9 @@
                     <div class="actors"><b>Actors:</b> ${fnfmt:joining(exampleSeries.actors)}</div>
                 </c:if>
                 <div class="genres"><b>Genres:</b> ${fnfmt:joining(exampleSeries.genres)}</div>
-                <div>
+                <div class="summary">
                     <div><b>Summary:</b></div>
-                    <div>${exampleSeries.plot}</div>
+                    <span>${exampleSeries.plot}</span>
                 </div>
                 <c:if test="${exampleSeries.nextEpisode != null}">
                     <div class="next-episode">
@@ -221,6 +213,7 @@
 <section id="change-log" class="container">
     <article>
         <h2>Change Log</h2>
+        <hr>
         <ul>
             <li><%= LocalDate.of(2015, Month.DECEMBER, 3)%></li>
             <ul>
