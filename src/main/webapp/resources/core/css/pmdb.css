@@ -75,13 +75,13 @@ section {
 .json-example > .code > pre {
     background-color: #2b2b2b;
 }
-.result.success {
+.result.success, .addResult.success {
     color: green;
     padding: 0 10px;
     font-size: large;
     font-weight: bold;
 }
-.result.error {
+.result.error, .addResult.error {
     color: red;
     padding: 0 10px;
     font-size: large;
@@ -139,4 +139,13 @@ td {
 .info-block > .next-episode {
     position: absolute;
     bottom: 0;
+}
+
+/* Admin panel */
+.admin-add-series {
+    padding: 5px 0;
+}
+.admin-add-series > span {
+    font-size: 18px;
+    font-weight: bold;
 }

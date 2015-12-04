@@ -46,4 +46,16 @@ public class UserSeriesServiceImpl implements UserSeriesService {
             userSeriesRepository.delete(userSeries);
         }
     }
+
+    @Override
+    public void deleteUserSeries(String id) {
+        userSeriesRepository.delete(id);
+    }
+
+    @Override
+    public void updateUserSeries(String id, String title) {
+        UserSeries userSeries = userSeriesRepository.findOne(id);
+        userSeries.setTitle(title);
+        userSeriesRepository.save(userSeries);
+    }
 }

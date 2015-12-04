@@ -126,7 +126,7 @@
                 </div>
             </form>
         </fieldset>
-        <fieldset class="col-md-offset-1 col-md-5">
+        <fieldset class="col-md-offset-2 col-md-5">
             <legend>Add Series</legend>
             <form class="form-inline" id="addSeriesForm">
                 <div class="form-group">

@@ -47,5 +47,24 @@ function addSeries() {
         })
 }
 function parseSeries(id) {
-    $.post("/user/series/parse", {userSeriesId : id});
+    $.post("/user/series/parse", {'id' : id})
+        .done(function(data) {
+            location.reload();
+        })
+        .fail(function(data, status, jqXHR) {
+            $('.error').html(data.responseText);
+        });
+}
+function updateTitle(id) {
+    var inputValue = $('#' + id);
+    $.post("/user/series/update", {'id' : id, 'title' : inputValue[0].value})
+        .done(function() {
+            location.reload();
+        })
+}
+function deleteUserService(id) {
+    $.post("/user/series/delete", {'id' : id})
+        .done(function() {
+            location.reload();
+        });
 }

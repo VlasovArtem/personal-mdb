@@ -8,6 +8,7 @@ import com.vlasovartem.pmdb.repository.SeriesRepository;
 import com.vlasovartem.pmdb.repository.UserSeriesRepository;
 import com.vlasovartem.pmdb.utils.exception.SeriesParsingException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jsoup.Jsoup;
@@ -174,7 +175,7 @@ public class SeriesParser {
             Document document = Jsoup.connect(preparedUrl).timeout(200000).get();
             Element element = document.select("#main .findSection .result_text > a").first();
             if(nonNull(element)) {
-                if(element.text().toLowerCase().equals(title)) {
+                if(StringUtils.equalsIgnoreCase(element.text(), title)) {
                     return IMDB_INITIAL_URL + element.attr("href");
                 } else {
                     LOG.warn(String.format("Title of the series %s does not match any series", title));
