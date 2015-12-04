@@ -14,11 +14,10 @@ import java.io.IOException;
  */
 public class ParserTest {
     public static void main(String[] args) throws IOException {
-//        ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-//        SeriesRepository seriesRepository = (SeriesRepository) context.getBean("seriesRepository");
-//        SeriesParser parser = (SeriesParser) context.getBean("seriesParser");
-//        System.out.println(parser);
+        ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+        SeriesRepository seriesRepository = (SeriesRepository) context.getBean("seriesRepository");
+        SeriesParser parser = (SeriesParser) context.getBean("seriesParser");
 
-        System.out.println(BCrypt.hashpw("0637472072", BCrypt.gensalt()));
+        System.out.println(seriesRepository.findParsedSeriesTitles().size());
     }
 }

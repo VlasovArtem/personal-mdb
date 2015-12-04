@@ -11,6 +11,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.tomcat.jni.Local;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -21,7 +22,10 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -430,7 +434,13 @@ public class SeriesParser {
     }
 
     /**
-     * Parse next episode date
+     * Parse next episode for the particular Series.
+     * If Next episode is the end of the season. Than method try to find next episode from next season.
+     * Otherwise if the next episode is not null, method will find list of the episode associated with current season
+     * and find next episode.
+     * If next episode is null, then method will parse throw season and find next episode. First it will filter
+     * season which season end date is null or is after current day, then will find and return first episode which
+     * date is after current date.
      * @param series updated series
      * @return date of the next episode.
      */
@@ -442,7 +452,7 @@ public class SeriesParser {
                 if(Objects.nonNull(nextSeason.getEpisodes()) && nextSeason.getEpisodes().size() != 0) {
                     return nextSeason.getEpisodes().get(0);
                 }
-            } else {
+            } else if(Objects.nonNull(series.getNextEpisode())) {
                 List<Episode> episodes = series.getSeasons().stream()
                         .filter(s -> s.getSeasonNumber() == series.getNextEpisode().getSeasonNumber())
                         .findFirst().get().getEpisodes();
@@ -450,6 +460,22 @@ public class SeriesParser {
                     return episodes.stream()
                             .filter(e -> e.getEpisodeNumber() == series.getNextEpisode().getEpisodeNumber() + 1)
                             .findFirst().get();
+                }
+            } else {
+                List<Season> matchedSeasons = series.getSeasons().stream()
+                        .filter(s -> Objects.isNull(s.getSeasonEnd())
+                                || s.getSeasonEnd().isAfter(LocalDate.now()))
+                        .sorted(Comparator.comparingInt(Season::getSeasonNumber))
+                        .collect(Collectors.toList());
+                if(Objects.nonNull(matchedSeasons) && matchedSeasons.size() != 0) {
+                    for (Season matchedSeason : matchedSeasons) {
+                        for (Episode episode : matchedSeason.getEpisodes()) {
+                            if(Objects.nonNull(episode.getEpisodeDate())
+                                    && episode.getEpisodeDate().isAfter(LocalDate.now())) {
+                                return episode;
+                            }
+                        }
+                    }
                 }
             }
         }

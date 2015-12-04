@@ -141,4 +141,47 @@ public class Series {
     public void setNextEpisode(Episode nextEpisode) {
         this.nextEpisode = nextEpisode;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Series)) return false;
+
+        Series series = (Series) o;
+
+        if (finished != series.finished) return false;
+        if (id != null ? !id.equals(series.id) : series.id != null) return false;
+        if (posterUrl != null ? !posterUrl.equals(series.posterUrl) : series.posterUrl != null) return false;
+        if (imdbUrl != null ? !imdbUrl.equals(series.imdbUrl) : series.imdbUrl != null) return false;
+        if (title != null ? !title.equals(series.title) : series.title != null) return false;
+        if (seriesStart != null ? !seriesStart.equals(series.seriesStart) : series.seriesStart != null) return false;
+        if (seriesEnd != null ? !seriesEnd.equals(series.seriesEnd) : series.seriesEnd != null) return false;
+        if (genres != null ? !genres.equals(series.genres) : series.genres != null) return false;
+        if (imdbRating != null ? !imdbRating.equals(series.imdbRating) : series.imdbRating != null) return false;
+        if (plot != null ? !plot.equals(series.plot) : series.plot != null) return false;
+        if (creators != null ? !creators.equals(series.creators) : series.creators != null) return false;
+        if (actors != null ? !actors.equals(series.actors) : series.actors != null) return false;
+        if (seasons != null ? !seasons.equals(series.seasons) : series.seasons != null) return false;
+        return !(nextEpisode != null ? !nextEpisode.equals(series.nextEpisode) : series.nextEpisode != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (posterUrl != null ? posterUrl.hashCode() : 0);
+        result = 31 * result + (imdbUrl != null ? imdbUrl.hashCode() : 0);
+        result = 31 * result + (title != null ? title.hashCode() : 0);
+        result = 31 * result + (seriesStart != null ? seriesStart.hashCode() : 0);
+        result = 31 * result + (seriesEnd != null ? seriesEnd.hashCode() : 0);
+        result = 31 * result + (finished ? 1 : 0);
+        result = 31 * result + (genres != null ? genres.hashCode() : 0);
+        result = 31 * result + (imdbRating != null ? imdbRating.hashCode() : 0);
+        result = 31 * result + (plot != null ? plot.hashCode() : 0);
+        result = 31 * result + (creators != null ? creators.hashCode() : 0);
+        result = 31 * result + (actors != null ? actors.hashCode() : 0);
+        result = 31 * result + (seasons != null ? seasons.hashCode() : 0);
+        result = 31 * result + (nextEpisode != null ? nextEpisode.hashCode() : 0);
+        return result;
+    }
 }

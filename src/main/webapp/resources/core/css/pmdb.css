@@ -4,6 +4,13 @@ html, body {
 section {
     padding-bottom: 50px;
 }
+hr {
+    margin: 10px 0 10px 0;
+}
+legend {
+    border-color: transparent;
+    margin-bottom: 10px;
+}
 
 /* Nav bar */
 .pmdb-navbar {
@@ -103,7 +110,7 @@ td {
     position: relative;
 }
 .usage-example-block > article {
-    /*width: 500px;*/
+    width: 500px;
     position: relative;
     padding: 0 15px;
     float: left;

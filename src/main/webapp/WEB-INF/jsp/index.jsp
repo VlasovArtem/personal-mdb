@@ -17,6 +17,7 @@
         <article>
             <section class="col-md-6">
                 <h2>Personal MDB (Movie Database)</h2>
+                <hr>
                 This project was developed for my personal project that dedicated to Series Tracking. I haven`t found good
                 parsers and api that can provide useful and fresh information about favorite Series from website
                 www.imdb.com.
@@ -26,6 +27,7 @@
             </section>
             <section class="json-example col-md-6">
                 <h2>Json Example</h2>
+                <hr>
                 Data which presents in code block will be received after request <i>/series?title=The Expanse</i>.
                 This request will return full information about series with title "The Expanse".
                 <article class="code">
@@ -42,6 +44,7 @@
 <section class="container" id="api-info">
     <article>
         <h2>API Info</h2>
+        <hr>
         <table class="table table-striped">
             <tr>
                 <th>Parameter</th>
@@ -112,6 +115,7 @@
 <section id="parsed-series" class="container">
     <article>
         <h2>Parsed Series</h2>
+        <hr>
         This list contains all series that successfully parsed into our database. This list will be update every day..
         Today we have ${fn:length(series)} parsed Series.<br>
         If you cannot find your favorite Series, please use "Add Series" form, and then we will parse your series as
@@ -172,6 +176,7 @@
 <section id="usage-example" class="container">
     <article>
         <h2>Usage Example</h2>
+        <hr>
         <div class="usage-example-block">
             <aside>
                 <img src="${exampleSeries.posterUrl}" height="320">
@@ -192,9 +197,9 @@
                     <div class="actors"><b>Actors:</b> ${fnfmt:joining(exampleSeries.actors)}</div>
                 </c:if>
                 <div class="genres"><b>Genres:</b> ${fnfmt:joining(exampleSeries.genres)}</div>
-                <div>
+                <div class="summary">
                     <div><b>Summary:</b></div>
-                    <div>${exampleSeries.plot}</div>
+                    <span>${exampleSeries.plot}</span>
                 </div>
                 <c:if test="${exampleSeries.nextEpisode != null}">
                     <div class="next-episode">
@@ -208,6 +213,7 @@
 <section id="change-log" class="container">
     <article>
         <h2>Change Log</h2>
+        <hr>
         <ul>
             <li><%= LocalDate.of(2015, Month.DECEMBER, 3)%></li>
             <ul>

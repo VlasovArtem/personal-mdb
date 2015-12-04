@@ -16,14 +16,26 @@ import java.util.List;
  */
 @Repository
 public interface SeriesRepository extends MongoRepository<Series, String> {
+    @Query(value = "{}", fields = "{title : 1}")
+    List<Series> findParsedSeriesTitles();
+
     int countByTitleIgnoreCase(String title);
+
     List<Series> findByFinishedIsFalse();
+
     List<Series> findByFinishedIsFalseAndNextEpisodeEpisodeDateGreaterThan(LocalDate today);
+
     Series findByTitleIgnoreCase(String title);
+
     List<Series> findBySeriesStartBetween(LocalDate yearStart, LocalDate yearEnd, Sort sort);
+
     List<Series> findBySeriesStartBetweenAndFinishedIsFalse(LocalDate yearStart, LocalDate yearEnd, Sort sort);
+
     List<Series> findByGenresIgnoreCase(String genre, Sort sort);
+
     List<Series> findByGenresIgnoreCaseAndFinishedIsFalse(String genre, Sort sort);
+
     List<Series> findByGenresIgnoreCaseAndSeriesStartBetween(String genre, LocalDate yearStart, LocalDate yearEnd, Sort sort);
+
     List<Series> findByGenresIgnoreCaseAndSeriesStartBetweenAndFinishedIsFalse(String genre, LocalDate yearStart, LocalDate yearEnd, Sort sort);
 }
