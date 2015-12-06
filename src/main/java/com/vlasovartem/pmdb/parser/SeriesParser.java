@@ -95,6 +95,7 @@ public class SeriesParser {
      * @param series updated series
      */
     public void updateImdbRating (Series series) {
+        LOG.info(String.format("Update imdb rating for series %s", series.getTitle()));
         try {
             Document document = Jsoup.connect(series.getImdbUrl()).timeout(200000).get();
             Element element = document.select("#title-overview-widget-layout").first();
@@ -114,6 +115,7 @@ public class SeriesParser {
      * @param series updated series
      */
     public void updateNextEpisode (Series series) {
+        LOG.info(String.format("Update next episode for series %s", series.getTitle()));
         series.setNextEpisode(parseNextEpisode(series));
     }
 
@@ -123,6 +125,7 @@ public class SeriesParser {
      */
     public void update (Series series) {
         if (nonNull(series)) {
+            LOG.info(String.format("Update series %s", series.getTitle()));
             series.setFinished(checkSeriesIsFinished(series));
             if(!series.isFinished()) {
                 if(!checkEndOfTheSeries(series)) {

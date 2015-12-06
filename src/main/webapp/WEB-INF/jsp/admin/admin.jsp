@@ -9,12 +9,12 @@
 <header>
     <%@include file="../navbar.jsp"%>
 </header>
-<section id="added-series" class="container">
+<section id="added-series" class="col-md-6 container">
     <h2 class="center">User Series</h2>
     <div class="col-md-12 center admin-add-series">
         <span class="error"></span>
     </div>
-    <article class="col-md-offset-2 col-md-8">
+    <article>
         <table class="table table-striped ">
             <tr>
                 <th>Series title</th>
@@ -42,6 +42,14 @@
                 <input type="button" class="btn btn-success" value="Parse all series" onclick="parseAllSeries()">
             </div>
         </c:if>
+    </article>
+</section>
+<section class="col-md-6 container" id="update-series">
+    <h2 class="center">Update Series</h2>
+    <article class="center">
+        <input type="button" class="btn btn-success" value="Update All" onclick="updateSeries('all')">
+        <input type="button" class="btn btn-success" value="Update Rating" onclick="updateSeries('rating')">
+        <input type="button" class="btn btn-success" value="Update Episodes" onclick="updateSeries('episodes')">
     </article>
 </section>
 </body>

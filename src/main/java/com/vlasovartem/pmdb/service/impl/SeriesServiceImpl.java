@@ -1,15 +1,18 @@
 package com.vlasovartem.pmdb.service.impl;
 
 import com.vlasovartem.pmdb.entity.Series;
+import com.vlasovartem.pmdb.parser.SeriesParser;
 import com.vlasovartem.pmdb.repository.SeriesRepository;
 import com.vlasovartem.pmdb.service.SeriesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by artemvlasov on 29/11/15.
@@ -18,9 +21,11 @@ import java.util.List;
 public class SeriesServiceImpl implements SeriesService {
 
     private SeriesRepository seriesRepository;
+    private SeriesParser seriesParser;
 
     @Autowired
-    public SeriesServiceImpl(SeriesRepository seriesRepository) {
+    public SeriesServiceImpl(@Qualifier("seriesRepository") SeriesRepository seriesRepository, SeriesParser seriesParser) {
+        this.seriesParser = seriesParser;
         this.seriesRepository = seriesRepository;
     }
 
@@ -58,6 +63,40 @@ public class SeriesServiceImpl implements SeriesService {
             return seriesRepository.findByGenresIgnoreCaseAndSeriesStartBetween(genre, yearStart, yearEnd, sort);
         } else {
             return seriesRepository.findByGenresIgnoreCaseAndSeriesStartBetweenAndFinishedIsFalse(genre, yearStart, yearEnd, sort);
+        }
+    }
+
+    @Override
+    public void updateSeries(String type) {
+        List<Series> series = null;
+        switch (type.toUpperCase()) {
+            case "ALL":
+                series = seriesRepository.findByFinishedIsFalse();
+                if(Objects.nonNull(series)) {
+                    for (Series sery : series) {
+                        seriesParser.update(sery);
+                        seriesRepository.save(sery);
+                    }
+                }
+                break;
+            case "RATING":
+                series = seriesRepository.findAll();
+                if(Objects.nonNull(series)) {
+                    for (Series sery : series) {
+                        seriesParser.updateImdbRating(sery);
+                        seriesRepository.save(sery);
+                    }
+                }
+                break;
+            case "EPISODES":
+                series = seriesRepository.findSeriesForUpdateNextEpisode(LocalDate.now());
+                if(Objects.nonNull(series)) {
+                    for (Series sery : series) {
+                        seriesParser.updateNextEpisode(sery);
+                        seriesRepository.save(sery);
+                    }
+                }
+                break;
         }
     }
 }

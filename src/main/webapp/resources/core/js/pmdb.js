@@ -76,3 +76,16 @@ function parseAllSeries () {
             location.reload();
         })
 }
+function updateSeries(type) {
+    switch (type) {
+        case "all":
+            $.get("/series/admin/update/all");
+            break;
+        case "rating":
+            $.get("/series/admin/update/rating");
+            break;
+        case "episodes":
+            $.get("/series/admin/update/episodes");
+            break;
+    }
+}

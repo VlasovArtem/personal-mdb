@@ -1,11 +1,9 @@
 package com.vlasovartem.pmdb;
 
 import com.vlasovartem.pmdb.config.AppConfig;
-import com.vlasovartem.pmdb.parser.SeriesParser;
 import com.vlasovartem.pmdb.repository.SeriesRepository;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import java.io.IOException;
 
@@ -16,8 +14,5 @@ public class ParserTest {
     public static void main(String[] args) throws IOException {
         ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
         SeriesRepository seriesRepository = (SeriesRepository) context.getBean("seriesRepository");
-        SeriesParser parser = (SeriesParser) context.getBean("seriesParser");
-
-        System.out.println(seriesRepository.findParsedSeriesTitles().size());
     }
 }
