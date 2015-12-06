@@ -13,4 +13,6 @@ public interface SeriesService {
     List<Series> findByYear (int year, Sort sort, boolean hideFinished);
     List<Series> findByGenre(String genre, Sort sort, boolean hideFinished);
     List<Series> findByGenreAndYear(Integer year, String genre, Sort sort, Boolean hideFinished);
+
+    void updateSeries(String type);
 }
