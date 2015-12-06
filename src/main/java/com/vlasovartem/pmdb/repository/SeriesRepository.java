@@ -39,7 +39,8 @@ public interface SeriesRepository extends MongoRepository<Series, String> {
 
     List<Series> findByGenresIgnoreCaseAndSeriesStartBetweenAndFinishedIsFalse(String genre, LocalDate yearStart, LocalDate yearEnd, Sort sort);
 
-    @Query("{$or : [{'nextEpisode.episodeDate' : {$exists : false}}, {'nextEpisode.episodeDate' : {$lt : ?0}}], finished : false}")
+    @Query("{$or : [{'nextEpisode.episodeDate' : {$exists : false}}, {'nextEpisode.episodeDate' : {$lte : ?0}}], " +
+            "finished : false}")
     List<Series> findSeriesForUpdateNextEpisode (LocalDate now);
 
 }

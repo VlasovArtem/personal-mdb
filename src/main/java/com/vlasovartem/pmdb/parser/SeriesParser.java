@@ -523,15 +523,24 @@ public class SeriesParser {
         if(nonNull(series)) {
             if(nonNull(series.getSeriesEnd())
                     && LocalDate.now().minusYears(1).isAfter(series.getSeriesEnd())) return true;
-            int currentSeason = series.getNextEpisode().getSeasonNumber();
-            int currentEpisode = series.getNextEpisode().getEpisodeNumber();
-            if(series.getSeasons().size() == currentSeason) {
-                Season season = series.getSeasons().stream()
-                        .filter(s -> s.getSeasonNumber() == currentSeason)
-                        .findFirst()
-                        .get();
-                if(season.getEpisodes().size() == currentEpisode) {
-                    if(findAmountOfSeasons(series.getImdbUrl()) == currentSeason) return true;
+            if(Objects.nonNull(series.getNextEpisode())) {
+                int currentSeason = series.getNextEpisode().getSeasonNumber();
+                int currentEpisode = series.getNextEpisode().getEpisodeNumber();
+                if (series.getSeasons().size() == currentSeason) {
+                    Season season = series.getSeasons().stream()
+                            .filter(s -> s.getSeasonNumber() == currentSeason)
+                            .findFirst()
+                            .get();
+                    if (season.getEpisodes().size() == currentEpisode) {
+                        if (findAmountOfSeasons(series.getImdbUrl()) == currentSeason) return true;
+                    }
+                }
+            } else if(Objects.nonNull(series.getSeasons())) {
+                Season lastSeason = series.getSeasons().stream()
+                        .max(Comparator.comparingInt(Season::getSeasonNumber)).orElse(null);
+                if(Objects.nonNull(lastSeason)) {
+                    return !lastSeason.getEpisodes().stream().anyMatch(e -> Objects.isNull(e.getEpisodeDate()) ||
+                            (Objects.nonNull(e.getEpisodeDate()) && e.getEpisodeDate().isAfter(LocalDate.now())));
                 }
             }
 
