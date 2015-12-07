@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.vlasovartem.pmdb.utils.HtmlElementUtils.*;
 
@@ -47,14 +48,7 @@ public class EpisodeParser {
      * @return list of Episode
      */
     public List<Episode> parse(List<String> episodesUrls) {
-        List<Episode> episodes = new ArrayList<>(episodesUrls.size());
-        for (String episodeUrl : episodesUrls) {
-            Episode parsedEpisode = parse(episodeUrl);
-            if(Objects.nonNull(parsedEpisode)) {
-                episodes.add(parsedEpisode);
-            }
-        }
-        return episodes;
+        return episodesUrls.stream().map(this::parse).collect(Collectors.toList());
     }
 
     /**

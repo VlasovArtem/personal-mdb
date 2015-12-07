@@ -1,72 +1,75 @@
-Gotham
-The Flash
-How to Get Away with Murder
-Empire
-Fresh Off the Boat
-Daredevil
-Scorpion
-Agent Carter
-Forever
-Better Call Saul
-Jane the Virgin
-Constantine
-Wayward Pines
-iZombie
-The Last Man on Earth
-Battle Creek
 12 Monkeys
-Stalker
+Agent Carter
+Agents of S.H.I.E.L.D.
+American Horror Story
+Arrested Development
+Arrow
+Ash vs Evil Dead
+Battle Creek
+Better Call Saul
+Blindspot
+Bones
+Bron/Broen
+Brooklyn Nine-Nine
+Castle
+Chicago Med
+Con Man
+Constantine
+Criminal Minds
+Da Vinci's Demons
+Daredevil
+Elementary
+Empire
+Fargo
+Flesh and Bone
+Forever
+Fresh Off the Boat
+Game of Thrones
+Gotham
+Grimm
+Hawaii Five-0
+Homeland
+House of Cards
+How to Get Away with Murder
+Into the Badlands
+Jane the Virgin
+Jessica Jones
+Last Man Standing
+Limitless
+Master of None
+Modern Family
+Mr. Robot
+Narcos
+Peaky Blinders
+Person of Interest
+Quantico
+Scorpion
 Secrets and Lies
-The Whispers
+Sherlock
+Silicon Valley
+Sleepy Hollow
+South Park
+Stalker
+Suits
+Supergirl
+Supernatural
+The 100
+The Big Bang Theory
+The Blacklist
+The Expanse
+The Flash
+The Good Wife
+The Grinder
+The Knick
+The Last Man on Earth
+The Librarians
+The Man in the High Castle
 The Messengers
+The Middle
 The Mysteries of Laura
 The Odd Couple
-Supernatural
 The Walking Dead
-Limitless
-Arrow
-The Big Bang Theory
-Agents of S.H.I.E.L.D.
-The Blacklist
-Castle
-Fargo
-Blindspot
-Da Vinci's Demons
-Bones
-Brooklyn Nine-Nine
-The Good Wife
-Quantico
-Criminal Minds
-The Librarians
-The Knick
-Sleepy Hollow
-Hawaii Five-0
-Ash vs Evil Dead
-Narcos
-Jessica Jones
-Mr. Robot
-Modern Family
-American Horror Story
-Master of None
-Supergirl
-Game of Thrones
-The 100
-Flesh and Bone
-Homeland
-Sherlock
-Person of Interest
-Suits
+The Whispers
 True Detective
-Peaky Blinders
-Elementary
-The Middle
-The Bridge
-The Man in the High Castle
-Last Man Standing
-The Grinder
-Con Man
-Into the Badlands
-The Expanse
-Chicago Med
-Silicon Valley
-Grimm
+Wayward Pines
+iZombie
