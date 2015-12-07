@@ -1,5 +1,6 @@
 package com.vlasovartem.pmdb.parser;
 
+import com.sun.javadoc.Doc;
 import com.vlasovartem.pmdb.entity.Episode;
 import com.vlasovartem.pmdb.entity.Season;
 import com.vlasovartem.pmdb.entity.Series;
@@ -19,13 +20,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.vlasovartem.pmdb.utils.HtmlElementUtils.findText;
+import static java.util.Objects.*;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -126,7 +126,7 @@ public class SeriesParser {
     public void update (Series series) {
         if (nonNull(series)) {
             LOG.info(String.format("Update series %s", series.getTitle()));
-            series.setFinished(checkSeriesIsFinished(series));
+            checkSeriesIsFinished(series);
             if(!series.isFinished()) {
                 if(!checkEndOfTheSeries(series)) {
                     series.setNextEpisode(parseNextEpisode(series));
@@ -135,13 +135,13 @@ public class SeriesParser {
                                 .parse(IMDB_SERIES_SEASON_URL_PATTERN
                                         .replace("@ID", series.getId())
                                         .replace("@NUMBER", String.valueOf(series.getSeasons().size() + 1)));
-                        if(Objects.nonNull(season)) {
+                        if(nonNull(season)) {
                             series.getSeasons().add(season);
                         }
                     }
                     seasonParser.update(filterSeasonForUpdate(series.getSeasons()));
                 }
-            } else if (series.isFinished() && Objects.isNull(series.getSeriesEnd())) {
+            } else if (series.isFinished() && isNull(series.getSeriesEnd())) {
                 series.setSeriesEnd(parseSeriesEndDate(series.getSeasons()));
             }
         }
@@ -177,7 +177,7 @@ public class SeriesParser {
             boolean hasLocalizedTitle = element.text().toLowerCase().contains("aka");
             String localizeTitle = null;
             if(hasLocalizedTitle) {
-                 localizeTitle = element.text().toLowerCase();
+                localizeTitle = element.text().toLowerCase();
             }
             element = element.select("a").first();
             if(nonNull(element)) {
@@ -215,7 +215,8 @@ public class SeriesParser {
                 series.setId(parseSeriesId(seriesUrl));
                 series.setImdbUrl(seriesUrl);
                 series.setPosterUrl(checkProperty(parseSeriesImageUrl(titleLayout), seriesUrl, "image url"));
-                checkProperty(parseSeriesHeader(titleLayout, series), seriesUrl, "title or finished info");
+                series.setTitle(checkProperty(parseTitle(titleLayout), seriesUrl, "title"));
+                series.setFinished(checkProperty(parseSeriesIsFinished(titleLayout), seriesUrl, "finished"));
                 series.setGenres(checkProperty(parseGenres(titleLayout), seriesUrl, "genres"));
                 series.setImdbRating(checkProperty(parseImbdRating(titleLayout), seriesUrl, "imdb rating"));
                 series.setPlot(checkProperty(parseDescription(titleLayout), seriesUrl, "description"));
@@ -253,34 +254,38 @@ public class SeriesParser {
     }
 
     /**
-     * Parse element from the header tag. Title of the Series and check that the series is finished
-     * @param titleLayout element that contains parsed element
-     * @param series Series that should pick parsed properties
-     * @return true if all data parsed successfully otherwise return false
+     * Parse title of the series, if series title contains locale titles, method will parse title-extra on the
+     * English, otherwise will parse original title
+     * @param titleLayout part of the series page
+     * @return title of it is exists otherwise return null
      */
-    private Boolean parseSeriesHeader (Element titleLayout, Series series) {
-        String seriesFinishedPattern = "\\(\\d{4}-\\d{4}\\)";
+    private String parseTitle (Element titleLayout) {
         Elements headerElements = titleLayout.select("#overview-top > h1 > span");
         if(nonNull(headerElements)) {
             boolean hasExtraTitle = headerElements.stream().anyMatch(element1 -> element1.hasClass("title-extra"));
-            for (Element element : headerElements) {
-                if (element.hasClass("itemprop") && !hasExtraTitle) {
-                    series.setTitle(element.text());
-                } else if (element.hasClass("title-extra")) {
-                    String parsedText = element.text();
-                    for (String title : parsedText.split("\"")) {
-                        if (title.matches("(\\w+\\s?)+")) {
-                            series.setTitle(title);
-                        }
-                    }
-                } else if (element.hasClass("nobr")) {
-                    String result = element.text();
-                    if (result.matches(seriesFinishedPattern)) {
-                        series.setFinished(true);
-                    }
+            if(hasExtraTitle) {
+                String titleExtra = headerElements.stream()
+                        .filter(el -> el.hasClass("title-extra")).findFirst().get().text();
+                if(nonNull(titleExtra)) {
+                    return Stream.of(titleExtra.split("\"")).filter(te -> te.matches("(\\w+\\s?)+")).findFirst()
+                            .orElse(null);
                 }
+            } else {
+                return headerElements.stream().filter(el -> el.hasClass("itemprop")).findFirst().get().text();
             }
-            return true;
+        }
+        return null;
+    }
+
+    private Boolean parseSeriesIsFinished (Element titleLayout) {
+        String seriesFinishedPattern = "\\(\\d{4}(-|–)\\d{4}\\)";
+        Elements headerElements = titleLayout.select("#overview-top > h1 > span");
+        if(nonNull(headerElements)) {
+            Optional<Element> finishedElement = headerElements.stream().filter(el -> el.hasClass("nobr")).findFirst();
+            if(finishedElement.isPresent()) {
+                return finishedElement.get().text().matches(seriesFinishedPattern);
+            }
+
         }
         return null;
     }
@@ -360,10 +365,8 @@ public class SeriesParser {
      * @return parsed id of the series
      */
     private String parseSeriesId (String seriesUrl) {
-        for(String urlPart : seriesUrl.split("/")) {
-            if(urlPart.matches("tt\\d{7}")) {
-                return urlPart;
-            }
+        if(nonNull(seriesUrl)) {
+            return Stream.of(seriesUrl.split("/")).filter(u -> u.matches("tt\\d{7}")).findFirst().orElse(null);
         }
         return null;
     }
@@ -407,15 +410,7 @@ public class SeriesParser {
      */
     private LocalDate parseSeriesStartDate(List<Season> seasons) {
         if (nonNull(seasons)) {
-            if(seasons.get(0).getSeasonNumber() != 1) {
-                for (Season season : seasons) {
-                    if(season.getSeasonNumber() == 1) {
-                        return season.getSeasonStart();
-                    }
-                }
-            } else {
-                return seasons.get(0).getSeasonStart();
-            }
+            return seasons.stream().min(Comparator.comparingInt(Season::getSeasonNumber)).get().getSeasonStart();
         }
         return null;
     }
@@ -427,11 +422,11 @@ public class SeriesParser {
      */
     private LocalDate parseSeriesEndDate(List<Season> seasons) {
         if(nonNull(seasons)) {
-            if(seasons.get(seasons.size() - 1).getSeasonNumber() != seasons.size()) {
-                return seasons.stream().max(Comparator.comparingInt(Season::getSeasonNumber)).orElse(null).getSeasonEnd();
-            } else {
-                return seasons.get(seasons.size() - 1).getSeasonEnd();
-            }
+            return seasons.stream()
+                    .max(Comparator.comparingInt(Season::getSeasonNumber))
+                    .get().getEpisodes().stream()
+                    .max(Comparator.comparingInt(Episode::getEpisodeNumber))
+                    .get().getEpisodeDate();
         }
         return null;
     }
@@ -448,50 +443,27 @@ public class SeriesParser {
      * @return date of the next episode.
      */
     private Episode parseNextEpisode(Series series) {
-        if(Objects.nonNull(series)) {
-            if(checkEndOfTheSeason(series)) {
-                Season nextSeason = series.getSeasons().stream()
-                        .filter(s -> s.getSeasonNumber() == series.getNextEpisode().getSeasonNumber() + 1).findFirst().get();
-                if(Objects.nonNull(nextSeason.getEpisodes()) && nextSeason.getEpisodes().size() != 0) {
-                    return nextSeason.getEpisodes().get(0);
-                }
-            } else if(Objects.nonNull(series.getNextEpisode())) {
-                List<Episode> episodes = series.getSeasons().stream()
-                        .filter(s -> s.getSeasonNumber() == series.getNextEpisode().getSeasonNumber())
-                        .findFirst().get().getEpisodes();
-                if(Objects.nonNull(episodes) && episodes.size() != 0) {
-                    return episodes.stream()
-                            .filter(e -> e.getEpisodeNumber() == series.getNextEpisode().getEpisodeNumber() + 1)
-                            .findFirst().get();
-                }
-            } else {
-                List<Season> matchedSeasons = series.getSeasons().stream()
-                        .filter(s -> Objects.isNull(s.getSeasonEnd())
-                                || s.getSeasonEnd().isAfter(LocalDate.now()))
-                        .sorted(Comparator.comparingInt(Season::getSeasonNumber))
-                        .collect(Collectors.toList());
-                if(Objects.nonNull(matchedSeasons) && matchedSeasons.size() != 0) {
-                    for (Season matchedSeason : matchedSeasons) {
-                        for (Episode episode : matchedSeason.getEpisodes()) {
-                            if(Objects.nonNull(episode.getEpisodeDate())
-                                    && episode.getEpisodeDate().isAfter(LocalDate.now())) {
-                                return episode;
-                            }
-                        }
-                    }
-                }
-            }
+        if(!checkNextEpisode(series.getNextEpisode()) && nonNull(series.getSeasons())) {
+            return series.getSeasons().stream()
+                    .filter(s -> isNull(s.getSeasonEnd()) || s.getSeasonEnd().isAfter(LocalDate.now()))
+                    .flatMap(season -> season.getEpisodes().stream())
+                    .filter(e -> nonNull(e.getEpisodeDate()))
+                    .sorted((o1, o2) -> o2.getEpisodeDate().compareTo(o1.getEpisodeDate()))
+                    .findFirst().orElse(null);
+        } else {
+            return series.getNextEpisode();
         }
-        return null;
     }
 
     /**
-     * Check episode date if episode not null or current date is before episode date and return true otherwise false
-     * @param episodeDate Episode date
-     * @return true if episode date is after current date otherwise false
+     * Check next episode. Method will return true if next episode not null and next episode date not null and next
+     * episode date is after tomorrow.
+     * @param episode next episode from the series
+     * @return true if next episode is matches predicates otherwise false.
      */
-    private boolean checkEpisodeDate (LocalDate episodeDate) {
-        return nonNull(episodeDate) && LocalDate.now().isBefore(episodeDate);
+    private boolean checkNextEpisode(Episode episode) {
+        return nonNull(episode) && nonNull(episode.getEpisodeDate())
+                && (episode.getEpisodeDate().isAfter(LocalDate.now().minusDays(1)));
     }
 
     /**
@@ -519,33 +491,19 @@ public class SeriesParser {
         return String.format("Series with url %s, does not contains %s.", seriesUrl, errorObject);
     }
 
-    private boolean checkSeriesIsFinished (Series series) {
-        if(nonNull(series)) {
-            if(nonNull(series.getSeriesEnd())
-                    && LocalDate.now().minusYears(1).isAfter(series.getSeriesEnd())) return true;
-            if(Objects.nonNull(series.getNextEpisode())) {
-                int currentSeason = series.getNextEpisode().getSeasonNumber();
-                int currentEpisode = series.getNextEpisode().getEpisodeNumber();
-                if (series.getSeasons().size() == currentSeason) {
-                    Season season = series.getSeasons().stream()
-                            .filter(s -> s.getSeasonNumber() == currentSeason)
-                            .findFirst()
-                            .get();
-                    if (season.getEpisodes().size() == currentEpisode) {
-                        if (findAmountOfSeasons(series.getImdbUrl()) == currentSeason) return true;
-                    }
-                }
-            } else if(Objects.nonNull(series.getSeasons())) {
-                Season lastSeason = series.getSeasons().stream()
-                        .max(Comparator.comparingInt(Season::getSeasonNumber)).orElse(null);
-                if(Objects.nonNull(lastSeason)) {
-                    return !lastSeason.getEpisodes().stream().anyMatch(e -> Objects.isNull(e.getEpisodeDate()) ||
-                            (Objects.nonNull(e.getEpisodeDate()) && e.getEpisodeDate().isAfter(LocalDate.now())));
-                }
-            }
-
+    /**
+     * Check that series is finished. Series is finished if last season of the series does not contains null episode
+     * date or episode date is after today
+     * @param series Checked series
+     */
+    private void checkSeriesIsFinished (Series series) {
+        try {
+            Document document = Jsoup.connect(series.getImdbUrl()).get();
+            Element element = document.select("#title-overview-widget-layout").first();
+            parseSeriesIsFinished(element);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return false;
     }
 
     /**
@@ -555,9 +513,10 @@ public class SeriesParser {
      */
     private int findAmountOfSeasons(String seriesUrl) {
         try {
+            String seasonUrlPatten = "/title/tt\\d{7}/episodes\\?season=\\d.+";
             Document document = Jsoup.connect(seriesUrl).timeout(400000).get();
-            Elements seasonUrls = document.select("#title-episode-widget > .seasons-and-year-nav a");
-            return seasonUrls.size();
+            return (int) document.select("#title-episode-widget > .seasons-and-year-nav a").stream().filter
+                    (el -> el.attr("href").matches(seasonUrlPatten)).count();
         } catch (IOException e) {
             LOG.error(String.format("Series url %s is invalid", seriesUrl));
             e.printStackTrace();
@@ -565,35 +524,20 @@ public class SeriesParser {
         return 0;
     }
 
+    /**
+     * Check series is end
+     * @param series
+     * @return
+     */
     private boolean checkEndOfTheSeries(Series series) {
-        if(Objects.nonNull(series) && Objects.nonNull(series.getNextEpisode())) {
-            int currentSeason = series.getNextEpisode().getSeasonNumber();
-            if(series.getSeasons().size() == currentSeason) {
-                return checkEndOfTheSeason(series);
-            }
-        }
-        return false;
-    }
-    private boolean checkEndOfTheSeason (Series series) {
-        if(Objects.nonNull(series) && Objects.nonNull(series.getNextEpisode())) {
-            int currentSeason = series.getNextEpisode().getSeasonNumber();
-            int currentEpisode = series.getNextEpisode().getEpisodeNumber();
-            Season season;
-            if(series.getSeasons().get(series.getSeasons().size() - 1).getSeasonNumber() != currentSeason) {
-                season = series.getSeasons().stream()
-                        .filter(s -> s.getSeasonNumber() == currentSeason)
-                        .findFirst().get();
-            } else {
-                season = series.getSeasons().get(series.getSeasons().size() - 1);
-            }
-            return Objects.nonNull(season.getEpisodes()) && season.getEpisodes().size() == currentEpisode;
-        }
-        return false;
+        return nonNull(series.getSeasons()) && !series.getSeasons().stream()
+                .max(Comparator.comparingInt(Season::getSeasonNumber)).get().getEpisodes().stream()
+                .anyMatch(episode1 -> nonNull(episode1.getEpisodeDate()) && episode1.getEpisodeDate().isAfter(LocalDate.now()));
     }
 
     private List<Season> filterSeasonForUpdate (List<Season> seasons) {
         return seasons.stream()
-                .filter(s -> Objects.isNull(s.getSeasonStart()) || Objects.isNull(s.getSeasonEnd()))
+                .filter(s -> isNull(s.getSeasonStart()) || isNull(s.getSeasonEnd()))
                 .collect(Collectors.toList());
     }
 }

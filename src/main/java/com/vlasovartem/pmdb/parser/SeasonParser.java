@@ -60,14 +60,7 @@ public class SeasonParser {
      * @return list of seasons
      */
     public List<Season> parse(List<String> seasonsUrls) {
-        List<Season> seasons = new ArrayList<>(seasonsUrls.size());
-        for (String seasonsUrl : seasonsUrls) {
-            Season parsedSeason = parse(seasonsUrl);
-            if(Objects.nonNull(parsedSeason)) {
-                seasons.add(parsedSeason);
-            }
-        }
-        return seasons;
+        return seasonsUrls.stream().map(this::parse).collect(Collectors.toList());
     }
 
     /**
@@ -168,41 +161,21 @@ public class SeasonParser {
     }
 
     /**
-     * Parse season start date
+     * Parse season start date. Find episode with min episode number and return episode date.
      * @param episodes list of season episodes
      * @return episode start date
      */
     private LocalDate parseStartDate (List<Episode> episodes) {
-        if(Objects.nonNull(episodes) && episodes.size() > 0) {
-            if(episodes.get(0).getEpisodeNumber() != 1) {
-                for (Episode episode : episodes) {
-                    if (episode.getEpisodeNumber() == 1) {
-                        return episode.getEpisodeDate();
-                    }
-                }
-            } else {
-                return episodes.get(0).getEpisodeDate();
-            }
-        }
-        return null;
+        return episodes.stream().min(Comparator.comparingInt(Episode::getEpisodeNumber)).get().getEpisodeDate();
     }
 
     /**
-     * Parse end date of the season
+     * Parse end date of the season. Find episode with max episode and return episode date.
      * @param episodes list of episodes
      * @return parsed end date
      */
     private LocalDate parseEndDate (List<Episode> episodes) {
-        if(Objects.nonNull(episodes) && episodes.size() > 0) {
-            if(episodes.get(episodes.size() - 1).getEpisodeNumber() != episodes.size()) {
-                return episodes.stream()
-                        .max(Comparator.comparingInt(Episode::getEpisodeNumber))
-                        .orElse(null).getEpisodeDate();
-            } else {
-                return episodes.get(episodes.size() - 1).getEpisodeDate();
-            }
-        }
-        return null;
+        return episodes.stream().max(Comparator.comparingInt(Episode::getEpisodeNumber)).get().getEpisodeDate();
     }
 
     /**
@@ -228,10 +201,6 @@ public class SeasonParser {
      */
     private String createErrorMessage (String seriesUrl, String errorObject) {
         return String.format("Series with url %s, does not contains %s.", seriesUrl, errorObject);
-    }
-
-    private int parseNumberOfEpisodes (Element element) {
-        return element.select(".list.detail.eplist > .list-item").size();
     }
 
     private List<Episode> filterEpisodesForUpdate (List<Episode> episodes) {
