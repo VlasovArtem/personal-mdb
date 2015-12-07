@@ -166,7 +166,9 @@ public class SeasonParser {
      * @return episode start date
      */
     private LocalDate parseStartDate (List<Episode> episodes) {
-        return episodes.stream().min(Comparator.comparingInt(Episode::getEpisodeNumber)).get().getEpisodeDate();
+        if(Objects.nonNull(episodes))
+            return episodes.stream().min(Comparator.comparingInt(Episode::getEpisodeNumber)).get().getEpisodeDate();
+        return null;
     }
 
     /**
@@ -175,7 +177,9 @@ public class SeasonParser {
      * @return parsed end date
      */
     private LocalDate parseEndDate (List<Episode> episodes) {
-        return episodes.stream().max(Comparator.comparingInt(Episode::getEpisodeNumber)).get().getEpisodeDate();
+        if(Objects.nonNull(episodes))
+            return episodes.stream().max(Comparator.comparingInt(Episode::getEpisodeNumber)).get().getEpisodeDate();
+        return null;
     }
 
     /**

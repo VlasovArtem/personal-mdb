@@ -27,7 +27,16 @@ public class ParserTest {
         ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
         SeriesRepository seriesRepository = (SeriesRepository) context.getBean("seriesRepository");
         SeriesParser parser = (SeriesParser) context.getBean("seriesParser");
-        Series series = parser.parse("Fargo");
-        System.out.println(series);
+//        Series series = parser.parse("Criminal Minds");
+//        System.out.println(series);
+        File file = new File("series-titles.txt");
+        if(file.exists()) {
+            for (String s : FileUtils.readLines(file)) {
+                if(seriesRepository.countByTitleIgnoreCase(s) == 0) {
+                    Series series = parser.parse(s);
+                    seriesRepository.save(series);
+                }
+            }
+        }
     }
 }
