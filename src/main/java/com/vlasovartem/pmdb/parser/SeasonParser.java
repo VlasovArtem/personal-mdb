@@ -10,6 +10,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.client.OkHttpClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -166,8 +167,13 @@ public class SeasonParser {
      * @return episode start date
      */
     private LocalDate parseStartDate (List<Episode> episodes) {
-        if(Objects.nonNull(episodes))
-            return episodes.stream().min(Comparator.comparingInt(Episode::getEpisodeNumber)).get().getEpisodeDate();
+        if(Objects.nonNull(episodes)) {
+            Episode firstSeasonEpisode = episodes.stream().min(Comparator.comparingInt(Episode::getEpisodeNumber))
+                    .orElse(null);
+            if(Objects.nonNull(firstSeasonEpisode)) {
+                return firstSeasonEpisode.getEpisodeDate();
+            }
+        }
         return null;
     }
 
@@ -177,8 +183,13 @@ public class SeasonParser {
      * @return parsed end date
      */
     private LocalDate parseEndDate (List<Episode> episodes) {
-        if(Objects.nonNull(episodes))
-            return episodes.stream().max(Comparator.comparingInt(Episode::getEpisodeNumber)).get().getEpisodeDate();
+        if(Objects.nonNull(episodes)) {
+            Episode lastSeasonEpisode = episodes.stream().max(Comparator.comparingInt(Episode::getEpisodeNumber))
+                    .orElse(null);
+            if(Objects.nonNull(lastSeasonEpisode)) {
+                return lastSeasonEpisode.getEpisodeDate();
+            }
+        }
         return null;
     }
 

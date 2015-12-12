@@ -98,7 +98,7 @@ public class SeriesParser {
         LOG.info(String.format("Update imdb rating for series %s", series.getTitle()));
         try {
             Document document = Jsoup.connect(series.getImdbUrl()).timeout(200000).get();
-            Element element = document.select("#title-overview-widget-layout").first();
+            Element element = document.select("##title-overview-widget").first();
             if(nonNull(element)) {
                 series.setImdbRating(parseImbdRating(element));
             }
@@ -209,7 +209,7 @@ public class SeriesParser {
     private Series parseSeriesUrlContent (String seriesUrl) {
         try {
             Document document = Jsoup.connect(seriesUrl).get();
-            Element titleLayout = document.select("#title-overview-widget-layout").first();
+            Element titleLayout = document.select("#title-overview-widget").first();
             Series series = new Series();
             if(nonNull(titleLayout)) {
                 series.setId(parseSeriesId(seriesUrl));
@@ -278,14 +278,16 @@ public class SeriesParser {
     }
 
     private Boolean parseSeriesIsFinished (Element titleLayout) {
-        String seriesFinishedPattern = "\\(\\d{4}(-|–)\\d{4}\\)";
-        Elements headerElements = titleLayout.select("#overview-top > h1 > span");
-        if(nonNull(headerElements)) {
-            Optional<Element> finishedElement = headerElements.stream().filter(el -> el.hasClass("nobr")).findFirst();
-            if(finishedElement.isPresent()) {
-                return finishedElement.get().text().matches(seriesFinishedPattern);
-            }
+        if(Objects.nonNull(titleLayout)) {
+            String seriesFinishedPattern = "\\(\\d{4}(-|–)\\d{4}\\)";
+            Elements headerElements = titleLayout.select("#overview-top > h1 > span");
+            if (nonNull(headerElements)) {
+                Optional<Element> finishedElement = headerElements.stream().filter(el -> el.hasClass("nobr")).findFirst();
+                if (finishedElement.isPresent()) {
+                    return finishedElement.get().text().matches(seriesFinishedPattern);
+                }
 
+            }
         }
         return null;
     }
@@ -499,7 +501,7 @@ public class SeriesParser {
     private void checkSeriesIsFinished (Series series) {
         try {
             Document document = Jsoup.connect(series.getImdbUrl()).get();
-            Element element = document.select("#title-overview-widget-layout").first();
+            Element element = document.select("#title-overview-widget").first();
             parseSeriesIsFinished(element);
         } catch (IOException e) {
             e.printStackTrace();
