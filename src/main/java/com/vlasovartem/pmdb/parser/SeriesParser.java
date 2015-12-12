@@ -1,6 +1,5 @@
 package com.vlasovartem.pmdb.parser;
 
-import com.sun.javadoc.Doc;
 import com.vlasovartem.pmdb.entity.Episode;
 import com.vlasovartem.pmdb.entity.Season;
 import com.vlasovartem.pmdb.entity.Series;
@@ -25,7 +24,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.vlasovartem.pmdb.utils.HtmlElementUtils.findText;
-import static java.util.Objects.*;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
