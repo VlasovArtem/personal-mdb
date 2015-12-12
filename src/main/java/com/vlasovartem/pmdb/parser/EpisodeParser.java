@@ -94,7 +94,7 @@ public class EpisodeParser {
     private Episode parseEpisodeContent (String episodeUrl) {
         try {
             Document document = Jsoup.connect(episodeUrl).timeout(200000).get();
-            Element episodeTopElement = document.select("#overview-top").first();
+            Element episodeTopElement = document.select("#title-overview-widget").first();
             if(Objects.nonNull(episodeTopElement)) {
                 Episode episode = new Episode();
                 episode.setUrl(episodeUrl);
